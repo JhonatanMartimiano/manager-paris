@@ -1,0 +1,14 @@
+/* funnels/home */
+.card-style {
+    min-width: 200px;
+    margin-right: 20px;
+}
+
+.card-style .card-body {
+    max-height: 100%;
+    min-width: 100%;
+}
+
+.col-20per {
+    width: 20%;
+}
