@@ -57,15 +57,17 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <?php foreach ($sellers as $seller): ?>
-                                        <tr>
-                                            <th scope="row"><?= $seller->id; ?></th>
-                                            <td>
-                                                <a href="<?= url('/admin/reports/seller/'.$seller->id) ?>"><?= $seller->fullName(); ?></a>
-                                            </td>
-                                            <td><?= $seller->countClients(); ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
+                                    <?php if ($sellers): ?>
+                                        <?php foreach ($sellers as $seller): ?>
+                                            <tr>
+                                                <th scope="row"><?= $seller->id; ?></th>
+                                                <td>
+                                                    <a href="<?= url('/admin/reports/seller/'.$seller->id) ?>"><?= $seller->fullName(); ?></a>
+                                                </td>
+                                                <td><?= $seller->countClients(); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
