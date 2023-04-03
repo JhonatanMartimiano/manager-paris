@@ -33,9 +33,48 @@ class Dash extends Admin
     {
         $seller_id = user()->seller_id;
         $negotiations = new Negotiation();
-        $post24h = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() < -1")->count() : $negotiations->find("next_contact - CURDATE() < -1 AND seller_id = :sid", "sid={$seller_id}")->count();
+        $post24hour = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() < -1")->count() : $negotiations->find("next_contact - CURDATE() < -1 AND seller_id = :sid", "sid={$seller_id}")->count();
         $completedOrders = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFinalizado'")->count() : $negotiations->find("contact_type = 'PFinalizado' AND seller_id = :sid", "sid={$seller_id}")->count();
-        $waiting = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND contact_type = 'PFinalizado' AND reason_loss = ''")->count() : $negotiations->find("contact_type = 'PFinalizado' AND seller_id = :sid", "sid={$seller_id}")->count();
+        $waiting = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->count();
+        $inNegotiations = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->count();
+        $loss = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '')")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '' AND seller_id = :sid)", "sid={$seller_id}")->count();
+
+        $query = Connect::getInstance()->query(
+            "SELECT 
+                      C.name AS cliente, V.first_name AS vendedor, 
+                      MAX(N.id) AS id_neg,
+                      MAX(CASE WHEN N.funnel_id = 1 THEN N.contact_type END) AS etapa1,
+                      MAX(CASE WHEN N.funnel_id = 1 THEN N.updated_at END) AS data1,
+                      MAX(CASE WHEN N.funnel_id = 1 THEN N.next_contact END) AS data11,
+                      MAX(CASE WHEN N.funnel_id = 1 THEN N.description END) AS obs1,
+                      MAX(CASE WHEN N.funnel_id = 2 THEN N.contact_type END) AS etapa2,
+                      MAX(CASE WHEN N.funnel_id = 2 THEN N.updated_at END) AS data2,
+                      MAX(CASE WHEN N.funnel_id = 2 THEN N.next_contact END) AS data22,
+                      MAX(CASE WHEN N.funnel_id = 2 THEN N.description END) AS obs2,
+                      MAX(CASE WHEN N.funnel_id = 3 THEN N.contact_type END) AS etapa3,
+                      MAX(CASE WHEN N.funnel_id = 3 THEN N.updated_at END) AS data3,
+                      MAX(CASE WHEN N.funnel_id = 3 THEN N.next_contact END) AS data33,
+                      MAX(CASE WHEN N.client_id = C.id THEN N.description END) AS obs
+                    FROM clients AS C 
+                      INNER JOIN negotiations AS N ON N.client_id = C.id 
+                      INNER JOIN sellers AS V ON N.seller_id = V.id 
+                    WHERE 
+                      N.id IN (
+                        SELECT 
+                          MAX(N2.id) 
+                        FROM negotiations AS N2 
+                        GROUP BY N2.client_id, N2.funnel_id
+                      )
+                    GROUP BY 
+                      C.id, 
+                      V.id 
+                    ORDER BY 
+                        id_neg DESC,
+                      C.name, 
+                      V.first_name
+                    LIMIT 20
+                    "
+        )->fetchAll();
 
         $head = $this->seo->render(
             CONF_SITE_NAME . " | Dashboard",
@@ -45,15 +84,22 @@ class Dash extends Admin
             false
         );
 
+        $registrationDate = (user()->level >= 3) ? (new Client())->find("registration_date - CURDATE() < -1 AND status AND status != 'Negociação'")->count() : (new Client())->find("registration_date - CURDATE() < -1 AND seller_id = :sid AND status != 'Negociação' AND status != 'Concluído'", "sid={$seller_id}")->count();
+        $userID = user()->id;
         $userID = user()->id;
         echo $this->view->render("widgets/dash/home", [
             "app" => "dash",
             "head" => $head,
+            "post24hour" => ($post24hour) ?? 0 + $registrationDate,
+            "completedOrders" => ($completedOrders) ?? 0,
+            "waiting" => ($waiting) ?? 0,
+            "inNegotiations" => ($inNegotiations) ?? 0,
+            "loss" => ($loss) ?? 0,
+            "allNegotiations" => $query,
             "negotiation" => (new Negotiation()),
             "newClients" => (\user()->level >= 3) ? (new Client())->find("funnel_id IS NULL")->limit(10)->fetch(true) : (new Client())->find("seller_id = :sid AND funnel_id IS NULL", "sid={$seller_id}")->limit(10)->fetch(true),
             "notification" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->count(),
-            "notifications" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->fetch(true),
-            "waiting" => $waiting
+            "notifications" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->fetch(true)
         ]);
     }
     /**
