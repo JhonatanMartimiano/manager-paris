@@ -45,11 +45,11 @@ class Client extends Model
     public function funnelNewClients()
     {
         if (user()->level >= 3) {
-            $find = (new Client())->find("funnel_id IS NULL");
+            $find = (new Client())->find("funnel_id IS NULL")->limit(10);
             return $find->fetch(true);
         } else {
             $seller_id = user()->seller_id;
-            $find = (new Client())->find("seller_id = :sid AND funnel_id IS NULL", "sid={$seller_id}");
+            $find = (new Client())->find("seller_id = :sid AND funnel_id IS NULL", "sid={$seller_id}")->limit(10);
             return $find->fetch(true);
         }
     }

@@ -33,48 +33,45 @@ class Dash extends Admin
     {
         $seller_id = user()->seller_id;
         $negotiations = new Negotiation();
-        $post24hour = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() < -1")->count() : $negotiations->find("next_contact - CURDATE() < -1 AND seller_id = :sid", "sid={$seller_id}")->count();
-        $completedOrders = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFinalizado'")->count() : $negotiations->find("contact_type = 'PFinalizado' AND seller_id = :sid", "sid={$seller_id}")->count();
-        $waiting = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->count();
-        $inNegotiations = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->count();
-        $loss = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '')")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '' AND seller_id = :sid)", "sid={$seller_id}")->count();
+        $post24hour = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() < -1")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() < -1 AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $completedOrders = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFinalizado'")->group("client_id")->count() : $negotiations->find("contact_type = 'PFinalizado' AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $waiting = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $inNegotiations = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $loss = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
 
         $query = Connect::getInstance()->query(
-            "SELECT 
-                      C.name AS cliente, V.first_name AS vendedor, 
-                      MAX(N.id) AS id_neg,
-                      MAX(CASE WHEN N.funnel_id = 1 THEN N.contact_type END) AS etapa1,
-                      MAX(CASE WHEN N.funnel_id = 1 THEN N.updated_at END) AS data1,
-                      MAX(CASE WHEN N.funnel_id = 1 THEN N.next_contact END) AS data11,
-                      MAX(CASE WHEN N.funnel_id = 1 THEN N.description END) AS obs1,
-                      MAX(CASE WHEN N.funnel_id = 2 THEN N.contact_type END) AS etapa2,
-                      MAX(CASE WHEN N.funnel_id = 2 THEN N.updated_at END) AS data2,
-                      MAX(CASE WHEN N.funnel_id = 2 THEN N.next_contact END) AS data22,
-                      MAX(CASE WHEN N.funnel_id = 2 THEN N.description END) AS obs2,
-                      MAX(CASE WHEN N.funnel_id = 3 THEN N.contact_type END) AS etapa3,
-                      MAX(CASE WHEN N.funnel_id = 3 THEN N.updated_at END) AS data3,
-                      MAX(CASE WHEN N.funnel_id = 3 THEN N.next_contact END) AS data33,
-                      MAX(CASE WHEN N.client_id = C.id THEN N.description END) AS obs
-                    FROM clients AS C 
-                      INNER JOIN negotiations AS N ON N.client_id = C.id 
-                      INNER JOIN sellers AS V ON N.seller_id = V.id 
-                    WHERE 
-                      N.id IN (
-                        SELECT 
-                          MAX(N2.id) 
-                        FROM negotiations AS N2 
-                        GROUP BY N2.client_id, N2.funnel_id
-                      )
-                    GROUP BY 
-                      C.id, 
-                      V.id 
-                    ORDER BY 
-                        id_neg DESC,
-                      C.name, 
-                      V.first_name
-                    LIMIT 20
-                    "
-        )->fetchAll();
+            "SELECT C.name AS cliente, V.first_name AS vendedor, 
+            MAX(N.id) AS id_neg,
+            MAX(CASE WHEN N.funnel_id = 1 THEN N.contact_type END) AS etapa1,
+            MAX(CASE WHEN N.funnel_id = 1 THEN N.updated_at END) AS data1,
+            MAX(CASE WHEN N.funnel_id = 1 THEN N.next_contact END) AS data11,
+            MAX(CASE WHEN N.funnel_id = 1 THEN N.description END) AS obs1,
+            MAX(CASE WHEN N.funnel_id = 2 THEN N.contact_type END) AS etapa2,
+            MAX(CASE WHEN N.funnel_id = 2 THEN N.updated_at END) AS data2,
+            MAX(CASE WHEN N.funnel_id = 2 THEN N.next_contact END) AS data22,
+            MAX(CASE WHEN N.funnel_id = 2 THEN N.description END) AS obs2,
+            MAX(CASE WHEN N.funnel_id = 3 THEN N.contact_type END) AS etapa3,
+            MAX(CASE WHEN N.funnel_id = 3 THEN N.updated_at END) AS data3,
+            MAX(CASE WHEN N.funnel_id = 3 THEN N.next_contact END) AS data33,
+            MAX(CASE WHEN N.client_id = C.id THEN N.description END) AS obs
+        FROM clients AS C 
+            INNER JOIN negotiations AS N ON N.client_id = C.id 
+            INNER JOIN sellers AS V ON N.seller_id = V.id 
+        WHERE 
+            N.id IN (
+            SELECT 
+                MAX(N2.id) 
+            FROM negotiations AS N2 
+            GROUP BY N2.client_id, N2.funnel_id
+            )
+        GROUP BY 
+            C.id, 
+            V.id 
+        ORDER BY 
+            id_neg DESC,
+            C.name, 
+            V.first_name
+        LIMIT 20")->fetchAll();
 
         $head = $this->seo->render(
             CONF_SITE_NAME . " | Dashboard",
@@ -84,8 +81,7 @@ class Dash extends Admin
             false
         );
 
-        $registrationDate = (user()->level >= 3) ? (new Client())->find("registration_date - CURDATE() < -1 AND status AND status != 'Negociação'")->count() : (new Client())->find("registration_date - CURDATE() < -1 AND seller_id = :sid AND status != 'Negociação' AND status != 'Concluído'", "sid={$seller_id}")->count();
-        $userID = user()->id;
+        $registrationDate = (user()->level >= 3) ? (new Client())->find("registration_date - CURDATE() < -1 AND status != 'Negociação'")->count() : (new Client())->find("registration_date - CURDATE() < -1 AND seller_id = :sid AND status != 'Negociação' AND status != 'Concluído'", "sid={$seller_id}")->count();
         $userID = user()->id;
         echo $this->view->render("widgets/dash/home", [
             "app" => "dash",
@@ -115,63 +111,21 @@ class Dash extends Admin
     public
     function late(?array $data)
     {
+
         $seller_id = \user()->seller_id;
-        (\user()->level >= 3) ? $clients = (new Client())->find()->fetch(true) : $clients = (new Client())->find("seller_id = :sid", "sid={$seller_id}")->fetch(true);;
-        if ($clients) {
-            foreach ($clients as $client) {
-                if ((new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count()) {
-                    $count = (new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count() - 1;
-                    $lastNegotiations[] = (new Negotiation())->find("client_id = :cid",
-                        "cid={$client->id}")->fetch(true)[$count];
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) < -1) {
-                        $post24hour[] = $lastNegotiations[$i];
-                    }
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) < -1 && date_diff_system($lastNegotiations[$i]->updated_at) >= -30) {
-                        $post24hour30[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if ($lastNegotiations[$i]->contact_type == "PFinalizado") {
-                        $completedOrders[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0 && $lastNegotiations[$i]->contact_type == 'APagamento' || $lastNegotiations[$i]->contact_type == 'Orçamento' || $lastNegotiations[$i]->contact_type == 'Cotação') {
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "") {
-                            $waiting[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0 && $lastNegotiations[$i]->contact_type != 'APagamento' && $lastNegotiations[$i]->contact_type != 'NRespondeu' && $lastNegotiations[$i]->contact_type != 'Orçamento' && $lastNegotiations[$i]->contact_type != 'Cotação') {
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "") {
-                            $inNegotiations[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if ($lastNegotiations[$i]->reason_loss != "") {
-                        $loss[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-        }
+        $negotiations = new Negotiation();
+        $post24hour = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() < -1")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() < -1 AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $completedOrders = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFinalizado'")->group("client_id")->count() : $negotiations->find("contact_type = 'PFinalizado' AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $waiting = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $inNegotiations = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $loss = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $post24hour30 = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() < -1 AND updated_at - CURDATE() >= -30")->order("id DESC")->group("client_id")->limit(20)->fetch(true) : $negotiations->find("next_contact - CURDATE() < -1 AND next_contact - updated_at() >= -30 AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->limit(20)->fetch(true);
+
+
         $post24hourF = null;
         if (!empty($data)) {
             $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
-            foreach ($post24hour as $post24h) {
+            foreach ($negotiations->find("next_contact - CURDATE() < -1")->group("client_id")->fetch(true) as $post24h) {
                 if (date_diff_system(date_fmt($post24h->updated_at, 'Y-m-d'), $data['first_date']) >= 0 && date_diff_system(date_fmt($post24h->updated_at, 'Y-m-d'), $data['second_date']) <= 0) {
                     $post24hourF[] = $post24h;
                 }
@@ -188,12 +142,12 @@ class Dash extends Admin
         echo $this->view->render('widgets/dash/late', [
             'app' => 'dash',
             'head' => $head,
-            "post24hour" => ($post24hour) ? count($post24hour) : 0 + $registrationDate,
+            "post24hour" => ($post24hour) ?? $registrationDate,
             "post24hourArr" => (!empty($data)) ? $post24hourF : $post24hour30,
-            "completedOrders" => ($completedOrders) ? count($completedOrders) : 0,
-            "waiting" => ($waiting) ? count($waiting) : 0,
-            "inNegotiations" => ($inNegotiations) ? count($inNegotiations) : 0,
-            "loss" => ($loss) ? count($loss) : 0,
+            "completedOrders" => ($completedOrders) ?? 0,
+            "waiting" => ($waiting) ?? 0,
+            "inNegotiations" => ($inNegotiations) ?? 0,
+            "loss" => ($loss) ?? 0,
             "date" => $data
         ]);
     }
@@ -201,62 +155,18 @@ class Dash extends Admin
     function completed(?array $data)
     {
         $seller_id = \user()->seller_id;
-        (\user()->level >= 3) ? $clients = (new Client())->find()->fetch(true) : $clients = (new Client())->find("seller_id = :sid", "sid={$seller_id}")->fetch(true);;
-        if ($clients) {
-            foreach ($clients as $client) {
-                if ((new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count()) {
-                    $count = (new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count() - 1;
-                    $lastNegotiations[] = (new Negotiation())->find("client_id = :cid",
-                        "cid={$client->id}")->fetch(true)[$count];
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) < -1) {
-                        $post24hour[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if ($lastNegotiations[$i]->contact_type == "PFinalizado") {
-                        $completedOrders[] = $lastNegotiations[$i];
-                    }
-                    if ($lastNegotiations[$i]->contact_type == "PFinalizado" && date_diff_system($lastNegotiations[$i]->updated_at) >= -30) {
-                        $completedOrders30[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0 && $lastNegotiations[$i]->contact_type == 'APagamento' || $lastNegotiations[$i]->contact_type == 'Orçamento' || $lastNegotiations[$i]->contact_type == 'Cotação') {
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "") {
-                            $waiting[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0 && $lastNegotiations[$i]->contact_type != 'APagamento' && $lastNegotiations[$i]->contact_type != 'NRespondeu' && $lastNegotiations[$i]->contact_type != 'Orçamento' && $lastNegotiations[$i]->contact_type != 'Cotação') {
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "") {
-                            $inNegotiations[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if ($lastNegotiations[$i]->reason_loss != "") {
-                        $loss[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-        }
+        $negotiations = new Negotiation();
+        $post24hour = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() < -1")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() < -1 AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $completedOrders = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFinalizado'")->group("client_id")->count() : $negotiations->find("contact_type = 'PFinalizado' AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $waiting = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $inNegotiations = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $loss = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $completedOrders30 = (user()->level >= 3) ? $negotiations->find("updated_at - CURDATE() >= -30 AND contact_type = 'PFinalizado'")->order("id DESC")->group("client_id")->limit(20)->fetch(true) : $negotiations->find("updated_at - CURDATE() >= -30 AND contact_type = 'PFinalizado' AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->limit(20)->fetch(true);
+
         $completedOrdersF = null;
         if (!empty($data)) {
             $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
-            foreach ($completedOrders as $completedOrder) {
+            foreach ($negotiations->find("contact_type = 'PFinalizado'")->group("client_id")->fetch(true) as $completedOrder) {
                 if (date_diff_system(date_fmt($completedOrder->updated_at, 'Y-m-d'), $data['first_date']) >= 0 && date_diff_system(date_fmt($completedOrder->updated_at, 'Y-m-d'), $data['second_date']) <= 0) {
                     $completedOrdersF[] = $completedOrder;
                 }
@@ -273,12 +183,12 @@ class Dash extends Admin
         echo $this->view->render('widgets/dash/completed', [
             'app' => 'dash',
             'head' => $head,
-            "post24hour" => ($post24hour) ? count($post24hour) : 0 + $registrationDate,
-            "completedOrders" => ($completedOrders) ? count($completedOrders) : 0,
+            "post24hour" => ($post24hour) ?? $registrationDate,
+            "completedOrders" => ($completedOrders) ?? 0,
             "completedOrdersArr" => (!empty($data)) ? $completedOrdersF : $completedOrders30,
-            "waiting" => ($waiting) ? count($waiting) : 0,
-            "inNegotiations" => ($inNegotiations) ? count($inNegotiations) : 0,
-            "loss" => ($loss) ? count($loss) : 0,
+            "waiting" => ($waiting) ?? 0,
+            "inNegotiations" => ($inNegotiations) ?? 0,
+            "loss" => ($loss) ?? 0,
             "date" => $data
         ]);
     }
@@ -286,62 +196,18 @@ class Dash extends Admin
     function waiting(?array $data)
     {
         $seller_id = \user()->seller_id;
-        (\user()->level >= 3) ? $clients = (new Client())->find()->fetch(true) : $clients = (new Client())->find("seller_id = :sid", "sid={$seller_id}")->fetch(true);;
-        if ($clients) {
-            foreach ($clients as $client) {
-                if ((new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count()) {
-                    $count = (new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count() - 1;
-                    $lastNegotiations[] = (new Negotiation())->find("client_id = :cid",
-                        "cid={$client->id}")->fetch(true)[$count];
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) < -1) {
-                        $post24hour[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if ($lastNegotiations[$i]->contact_type == "PFinalizado") {
-                        $completedOrders[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0 && $lastNegotiations[$i]->contact_type == 'APagamento' || $lastNegotiations[$i]->contact_type == 'Orçamento' || $lastNegotiations[$i]->contact_type == 'Cotação') {
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "") {
-                            $waiting[] = $lastNegotiations[$i];
-                        }
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "" && date_diff_system($lastNegotiations[$i]->updated_at) >= -30) {
-                            $waiting30[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0 && $lastNegotiations[$i]->contact_type != 'APagamento' && $lastNegotiations[$i]->contact_type != 'NRespondeu' && $lastNegotiations[$i]->contact_type != 'Orçamento' && $lastNegotiations[$i]->contact_type != 'Cotação') {
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "") {
-                            $inNegotiations[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if ($lastNegotiations[$i]->reason_loss != "") {
-                        $loss[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-        }
+        $negotiations = new Negotiation();
+        $post24hour = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() < -1")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() < -1 AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $completedOrders = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFinalizado'")->group("client_id")->count() : $negotiations->find("contact_type = 'PFinalizado' AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $waiting = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $inNegotiations = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $loss = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $waiting30 = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFinalizado' AND reason_loss = '' AND updated_at - CURDATE() >= -30")->order("id DESC")->group("client_id")->limit(20)->fetch(true) : $negotiations->find("contact_type = 'PFinalizado' AND reason_loss = '' AND updated_at - CURDATE() >= -30 AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->limit(20)->fetch(true);
+
         $waitF = null;
         if (!empty($data)) {
             $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
-            foreach ($waiting as $wait) {
+            foreach ($negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->fetch(true) as $wait) {
                 if (date_diff_system(date_fmt($wait->updated_at, 'Y-m-d'), $data['first_date']) >= 0 && date_diff_system(date_fmt($wait->updated_at, 'Y-m-d'), $data['second_date']) <= 0) {
                     $waitF[] = $wait;
                 }
@@ -358,12 +224,12 @@ class Dash extends Admin
         echo $this->view->render('widgets/dash/waiting', [
             'app' => 'dash',
             'head' => $head,
-            "post24hour" => ($post24hour) ? count($post24hour) : 0 + $registrationDate,
-            "completedOrders" => ($completedOrders) ? count($completedOrders) : 0,
-            "waiting" => ($waiting) ? count($waiting) : 0,
+            "post24hour" => ($post24hour) ?? $registrationDate,
+            "completedOrders" => ($completedOrders) ?? 0,
+            "waiting" => ($waiting) ?? 0,
             "waitingArr" => (!empty($data)) ? $waitF : $waiting30,
-            "inNegotiations" => ($inNegotiations) ? count($inNegotiations) : 0,
-            "loss" => ($loss) ? count($loss) : 0,
+            "inNegotiations" => ($inNegotiations) ?? 0,
+            "loss" => ($loss) ?? 0,
             "date" => $data
         ]);
     }
@@ -371,62 +237,18 @@ class Dash extends Admin
     function inNegotiations(?array $data)
     {
         $seller_id = \user()->seller_id;
-        (\user()->level >= 3) ? $clients = (new Client())->find()->fetch(true) : $clients = (new Client())->find("seller_id = :sid", "sid={$seller_id}")->fetch(true);;
-        if ($clients) {
-            foreach ($clients as $client) {
-                if ((new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count()) {
-                    $count = (new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count() - 1;
-                    $lastNegotiations[] = (new Negotiation())->find("client_id = :cid",
-                        "cid={$client->id}")->fetch(true)[$count];
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) < -1) {
-                        $post24hour[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if ($lastNegotiations[$i]->contact_type == "PFinalizado") {
-                        $completedOrders[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0 && $lastNegotiations[$i]->contact_type == 'APagamento' || $lastNegotiations[$i]->contact_type == 'Orçamento' || $lastNegotiations[$i]->contact_type == 'Cotação') {
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "") {
-                            $waiting[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0 && $lastNegotiations[$i]->contact_type != 'APagamento' && $lastNegotiations[$i]->contact_type != 'NRespondeu' && $lastNegotiations[$i]->contact_type != 'Orçamento' && $lastNegotiations[$i]->contact_type != 'Cotação') {
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "") {
-                            $inNegotiations[] = $lastNegotiations[$i];
-                        }
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "" && date_diff_system($lastNegotiations[$i]->updated_at) >= -30) {
-                            $inNegotiations30[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if ($lastNegotiations[$i]->reason_loss != "") {
-                        $loss[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-        }
+        $negotiations = new Negotiation();
+        $post24hour = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() < -1")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() < -1 AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $completedOrders = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFinalizado'")->group("client_id")->count() : $negotiations->find("contact_type = 'PFinalizado' AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $waiting = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $inNegotiations = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $loss = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $inNegotiations30 = (user()->level >= 3) ? $negotiations->find("contact_type != 'PFinalizado' AND reason_loss = '' AND updated_at - CURDATE() >= -30")->order("id DESC")->group("client_id")->limit(20)->fetch(true) : $negotiations->find("contact_type != 'PFinalizado' AND reason_loss = '' AND updated_at - CURDATE() >= -30 AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->limit(20)->fetch(true);
+
         $inNegotiationF = null;
         if (!empty($data)) {
             $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
-            foreach ($inNegotiations as $inNegotiation) {
+            foreach ($negotiations->find("contact_type != 'PFinalizado' AND reason_loss = '' AND updated_at - CURDATE() >= -30")->order("id DESC")->group("client_id")->fetch(true) as $inNegotiation) {
                 if (date_diff_system(date_fmt($inNegotiation->updated_at, 'Y-m-d'), $data['first_date']) >= 0 && date_diff_system(date_fmt($inNegotiation->updated_at, 'Y-m-d'), $data['second_date']) <= 0) {
                     $inNegotiationF[] = $inNegotiation;
                 }
@@ -443,12 +265,12 @@ class Dash extends Admin
         echo $this->view->render('widgets/dash/inNegotiations', [
             'app' => 'dash',
             'head' => $head,
-            "post24hour" => ($post24hour) ? count($post24hour) : 0 + $registrationDate,
-            "completedOrders" => ($completedOrders) ? count($completedOrders) : 0,
-            "waiting" => ($waiting) ? count($waiting) : 0,
-            "inNegotiations" => ($inNegotiations) ? count($inNegotiations) : 0,
+            "post24hour" => ($post24hour) ?? $registrationDate,
+            "completedOrders" => ($completedOrders) ?? 0,
+            "waiting" => ($waiting) ?? 0,
+            "inNegotiations" => ($inNegotiations) ?? 0,
             "inNegotiationsArr" => (!empty($data)) ? $inNegotiationF : $inNegotiations30,
-            "loss" => ($loss) ? count($loss) : 0,
+            "loss" => ($loss) ?? 0,
             "date" => $data
         ]);
     }
@@ -456,62 +278,18 @@ class Dash extends Admin
     function loss(?array $data)
     {
         $seller_id = \user()->seller_id;
-        (\user()->level >= 3) ? $clients = (new Client())->find()->fetch(true) : $clients = (new Client())->find("seller_id = :sid", "sid={$seller_id}")->fetch(true);;
-        if ($clients) {
-            foreach ($clients as $client) {
-                if ((new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count()) {
-                    $count = (new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count() - 1;
-                    $lastNegotiations[] = (new Negotiation())->find("client_id = :cid",
-                        "cid={$client->id}")->fetch(true)[$count];
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) < -1) {
-                        $post24hour[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if ($lastNegotiations[$i]->contact_type == "PFinalizado") {
-                        $completedOrders[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0 && $lastNegotiations[$i]->contact_type == 'APagamento' || $lastNegotiations[$i]->contact_type == 'Orçamento' || $lastNegotiations[$i]->contact_type == 'Cotação') {
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "") {
-                            $waiting[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0 && $lastNegotiations[$i]->contact_type != 'APagamento' && $lastNegotiations[$i]->contact_type != 'NRespondeu' && $lastNegotiations[$i]->contact_type != 'Orçamento' && $lastNegotiations[$i]->contact_type != 'Cotação') {
-                        if ($lastNegotiations[$i]->contact_type != "PFinalizado" && $lastNegotiations[$i]->reason_loss == "") {
-                            $inNegotiations[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if ($lastNegotiations[$i]->reason_loss != "") {
-                        $loss[] = $lastNegotiations[$i];
-                    }
-                    if ($lastNegotiations[$i]->reason_loss != "" && date_diff_system($lastNegotiations[$i]->updated_at) >= -30) {
-                        $loss30[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-        }
+        $negotiations = new Negotiation();
+        $post24hour = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() < -1")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() < -1 AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $completedOrders = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFinalizado'")->group("client_id")->count() : $negotiations->find("contact_type = 'PFinalizado' AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
+        $waiting = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type = 'APagamento' OR contact_type = 'Orçamento' OR contact_type = 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $inNegotiations = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (contact_type != 'APagamento' AND contact_type != 'NRespondeu' AND contact_type != 'Orçamento' AND contact_type != 'Cotação') AND (contact_type != 'PFinalizado' AND reason_loss = '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $loss = (user()->level >= 3) ? $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '')")->group("client_id")->count() : $negotiations->find("next_contact - CURDATE() >= 0 AND (reason_loss != '' AND seller_id = :sid)", "sid={$seller_id}")->group("client_id")->count();
+        $loss30 = (user()->level >= 3) ? $negotiations->find("reason_loss != '' AND updated_at - CURDATE() >= -30")->order("id DESC")->group("client_id")->limit(20)->fetch(true) : $negotiations->find("reason_loss != '' AND updated_at - CURDATE() >= -30 AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->limit(20)->fetch(true);
+
         $lossNF = null;
         if (!empty($data)) {
             $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
-            foreach ($loss as $lossN) {
+            foreach ($negotiations->find("reason_loss != '' AND updated_at - CURDATE() >= -30")->order("id DESC")->group("client_id")->fetch(true) as $lossN) {
                 if (date_diff_system(date_fmt($lossN->updated_at, 'Y-m-d'), $data['first_date']) >= 0 && date_diff_system(date_fmt($lossN->updated_at, 'Y-m-d'), $data['second_date']) <= 0) {
                     $lossNF[] = $lossN;
                 }
@@ -528,12 +306,12 @@ class Dash extends Admin
         echo $this->view->render('widgets/dash/loss', [
             'app' => 'dash',
             'head' => $head,
-            "post24hour" => ($post24hour) ? count($post24hour) : 0 + $registrationDate,
-            "completedOrders" => ($completedOrders) ? count($completedOrders) : 0,
-            "waiting" => ($waiting) ? count($waiting) : 0,
-            "inNegotiations" => ($inNegotiations) ? count($inNegotiations) : 0,
+            "post24hour" => ($post24hour) ?? $registrationDate,
+            "completedOrders" => ($completedOrders) ?? 0,
+            "waiting" => ($waiting) ?? 0,
+            "inNegotiations" => ($inNegotiations) ?? 0,
             "waitingArr" => $waiting,
-            "loss" => ($loss) ? count($loss) : 0,
+            "loss" => ($loss) ?? 0,
             "lossArr" => (!empty($data)) ? $lossNF : $loss30,
             "date" => $data
         ]);

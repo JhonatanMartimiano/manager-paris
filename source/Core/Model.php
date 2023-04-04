@@ -30,6 +30,9 @@ abstract class Model
     /** @var string */
     protected $order;
 
+    /** @var string */
+    protected $group;
+
     /** @var int */
     protected $limit;
 
@@ -154,6 +157,16 @@ abstract class Model
     }
 
     /**
+     * @param string $columnGroup
+     * @return Model
+     */
+    public function group(string $columnGroup): Model
+    {
+        $this->group = " GROUP BY {$columnGroup}";
+        return $this;
+    }
+
+    /**
      * @param int $limit
      * @return Model
      */
@@ -180,7 +193,7 @@ abstract class Model
     public function fetch(bool $all = false)
     {
         try {
-            $stmt = Connect::getInstance()->prepare($this->query . $this->order . $this->limit . $this->offset);
+            $stmt = Connect::getInstance()->prepare($this->query . $this->group. $this->order . $this->limit . $this->offset);
             $stmt->execute($this->params);
 
             if (!$stmt->rowCount()) {
@@ -204,7 +217,7 @@ abstract class Model
      */
     public function count(string $key = "id"): int
     {
-        $stmt = Connect::getInstance()->prepare($this->query);
+        $stmt = Connect::getInstance()->prepare($this->query . $this->order. $this->group . $this->limit . $this->offset);
         $stmt->execute($this->params);
         return $stmt->rowCount();
     }

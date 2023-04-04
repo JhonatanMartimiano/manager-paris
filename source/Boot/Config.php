@@ -6,10 +6,10 @@
  */
 define("CONF_IP_HOST", "192.168.100.65");
 if ($_SERVER['HTTP_HOST'] == "localhost" || $_SERVER['HTTP_HOST'] == CONF_IP_HOST) {
-    define("CONF_DB_HOST", "host.docker.internal");
-    define("CONF_DB_USER", "root");
-    define("CONF_DB_PASS", "");
-    define("CONF_DB_NAME", "databasedefault");
+    define("CONF_DB_HOST", "gestaoparis.mysql.dbaas.com.br");
+    define("CONF_DB_USER", "gestaoparis");
+    define("CONF_DB_PASS", "aA#102030");
+    define("CONF_DB_NAME", "gestaoparis");
     define("CONF_URL_TEST", "http://localhost");
 } else {
     define("CONF_DB_HOST", "gestaoparis.mysql.dbaas.com.br");
