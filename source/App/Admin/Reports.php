@@ -2,6 +2,7 @@
 
 namespace Source\App\Admin;
 
+use Source\Core\Connect;
 use Source\Models\Client;
 use Source\Models\Message;
 use Source\Models\Negotiation;
@@ -55,35 +56,10 @@ class Reports extends Admin
             false
         );
 
-        $clients = (new Client())->find()->fetch(true);
-
-        if ($clients) {
-            foreach ($clients as $client) {
-                if ((new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count()) {
-                    $count = (new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count() - 1;
-                    $lastNegotiations[] = (new Negotiation())->find("client_id = :cid",
-                        "cid={$client->id}")->fetch(true)[$count];
-                }
-            }
-
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) < -1) {
-                        $post24hour[] = $lastNegotiations[$i];
-                    }
-                }
-            }
-
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0) {
-                        if ($lastNegotiations[$i]->infoClient()->status != "Concluído" && $lastNegotiations[$i]->infoClient()->reason_loss == "") {
-                            $inNegotiations[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-        }
+        $negotiations = new Negotiation();
+        $post24hour = $negotiations->find("next_contact - CURDATE() < -1")->group("client_id")->count();
+        $inNegotiations = Connect::getInstance()->query("SELECT * FROM negotiations AS N INNER JOIN clients AS C ON N.client_id = C.id WHERE N.next_contact - CURDATE() >= 0 AND C.status != 'Concluído' AND C.reason_loss = ''")->rowCount();
+        $lastNegotiations = $negotiations->find()->group("client_id")->count();
 
         $userID = user()->id;
 
@@ -93,11 +69,11 @@ class Reports extends Admin
             "search" => $search,
             "sellers" => $sellers->limit($pager->limit())->offset($pager->offset())->fetch(true),
             "paginator" => $pager->render(),
-            "lastNegotiations" => ($lastNegotiations) ? count($lastNegotiations) : "0",
-            "post24hour" => ($post24hour) ? count($post24hour) : "0",
+            "lastNegotiations" => ($lastNegotiations) ?? "0",
+            "post24hour" => ($post24hour) ?? "0",
             "completedOrders" => (new Client())->find("status = 'Concluído'")->count(),
             "waiting" => (new Negotiation())->find("contact_type = 'APagamento' OR contact_type = 'NRespondeu'")->count(),
-            "inNegotiations" => ($inNegotiations) ? count($inNegotiations) : "0",
+            "inNegotiations" => ($inNegotiations) ?? "0",
             "notification" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->count(),
             "notifications" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->fetch(true)
         ]);
