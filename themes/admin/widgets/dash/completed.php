@@ -98,11 +98,10 @@
                                         <?php foreach ($completedOrdersArr as $negCompleted): ?>
                                             <tr class="bg-success text-white">
                                                 <td>
-                                                    <a href="<?= url('/admin/negotiations/negotiation/' . $negCompleted->infoClient()->id); ?>"
-                                                       class="text-white"><?= $negCompleted->infoClient()->name; ?></a>
+                                                    <a href="<?= url('/admin/negotiations/negotiation/' . infoClientID($negCompleted->client_id)->id); ?>" class="text-white"><?= infoClientID($negCompleted->client_id)->name; ?></a>
                                                 </td>
-                                                <td><?= $negCompleted->infoSeller()->fullName(); ?></td>
-                                                <td><?= $negCompleted->infoFunnel()->title; ?></td>
+                                                <td><?= infoSellerID($negCompleted->seller_id)->fullName(); ?></td>
+                                                <td><?= infoFunnelID($negCompleted->funnel_id)->title; ?></td>
                                                 <td><?= date_fmt($negCompleted->updated_at, 'd/m/Y'); ?></td>
                                                 <td><?= date_fmt($negCompleted->next_contact, 'd/m/Y'); ?></td>
                                                 <td><?= $negCompleted->description; ?></td>

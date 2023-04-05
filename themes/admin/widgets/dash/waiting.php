@@ -98,10 +98,10 @@
                                         <?php foreach ($waitingArr as $negWaiting): ?>
                                             <tr class="bg-warning text-white">
                                                 <td>
-                                                    <a href="<?= url('/admin/negotiations/negotiation/' . $negWaiting->infoClient()->id); ?>" class="text-white"><?= $negWaiting->infoClient()->name; ?></a>
+                                                    <a href="<?= url('/admin/negotiations/negotiation/' . infoClientID($negWaiting->client_id)->id); ?>" class="text-white"><?= infoClientID($negWaiting->client_id)->name; ?></a>
                                                 </td>
-                                                <td><?= $negWaiting->infoSeller()->fullName(); ?></td>
-                                                <td><?= $negWaiting->infoFunnel()->title; ?></td>
+                                                <td><?= infoSellerID($negWaiting->seller_id)->fullName(); ?></td>
+                                                <td><?= infoFunnelID($negWaiting->funnel_id)->title; ?></td>
                                                 <td><?= date_fmt($negWaiting->updated_at, 'd/m/Y'); ?></td>
                                                 <td><?= date_fmt($negWaiting->next_contact, 'd/m/Y'); ?></td>
                                                 <td><?= $negWaiting->description; ?></td>

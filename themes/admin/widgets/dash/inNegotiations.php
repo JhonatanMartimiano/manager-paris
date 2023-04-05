@@ -98,10 +98,10 @@
                                         <?php foreach ($inNegotiationsArr as $negInNegotiations): ?>
                                             <tr class="bg-info text-white">
                                                 <td>
-                                                    <a href="<?= url('/admin/negotiations/negotiation/' . $negInNegotiations->infoClient()->id); ?>" class="text-white"><?= $negInNegotiations->infoClient()->name; ?></a>
+                                                    <a href="<?= url('/admin/negotiations/negotiation/' . infoClientID($negInNegotiations->client_id)->id); ?>" class="text-white"><?= infoClientID($negInNegotiations->client_id)->name; ?></a>
                                                 </td>
-                                                <td><?= $negInNegotiations->infoSeller()->fullName(); ?></td>
-                                                <td><?= $negInNegotiations->infoFunnel()->title; ?></td>
+                                                <td><?= infoSellerID($negInNegotiations->seller_id)->fullName(); ?></td>
+                                                <td><?= infoFunnelID($negInNegotiations->funnel_id)->title; ?></td>
                                                 <td><?= date_fmt($negInNegotiations->updated_at, 'd/m/Y'); ?></td>
                                                 <td><?= date_fmt($negInNegotiations->next_contact, 'd/m/Y'); ?></td>
                                                 <td><?= $negInNegotiations->description; ?></td>

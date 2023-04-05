@@ -16,7 +16,7 @@ if ($_SERVER['HTTP_HOST'] == "localhost" || $_SERVER['HTTP_HOST'] == CONF_IP_HOS
     define("CONF_DB_USER", "gestaoparis");
     define("CONF_DB_PASS", "aA#102030");
     define("CONF_DB_NAME", "gestaoparis");
-    define("CONF_URL_BASE", "");
+    define("CONF_URL_BASE", "https://www.professionalparis.com.br/gestao");
 }
 
 /**

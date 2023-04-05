@@ -6,6 +6,11 @@
  * ####################
  */
 
+use Source\Models\Client;
+use Source\Models\Funnel;
+use Source\Models\Negotiation;
+use Source\Models\Seller;
+
 /**
  * @param string $email
  * @return bool
@@ -44,8 +49,12 @@ function str_slug(string $string): string
     $formats = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜüÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿRr"!@#$%&*()_-+={[}]/?;:.,\\\'<>°ºª';
     $replace = 'aaaaaaaceeeeiiiidnoooooouuuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr                                 ';
 
-    $slug = str_replace(["-----", "----", "---", "--"], "-",
-        str_replace(" ", "-",
+    $slug = str_replace(
+        ["-----", "----", "---", "--"],
+        "-",
+        str_replace(
+            " ",
+            "-",
             trim(strtr(utf8_decode($string), utf8_decode($formats), $replace))
         )
     );
@@ -59,7 +68,9 @@ function str_slug(string $string): string
 function str_studly_case(string $string): string
 {
     $string = str_slug($string);
-    $studlyCase = str_replace(" ", "",
+    $studlyCase = str_replace(
+        " ",
+        "",
         mb_convert_case(str_replace("-", " ", $string), MB_CASE_TITLE)
     );
 
@@ -338,7 +349,7 @@ function date_diff_panel(string $dateEnd, string $dateStart = "now"): int
     $interval = $date1->diff($date2);
     $result = $interval->days;
     $flag = $interval->invert; // 1 se data passada, 0 se data futura
-    if($flag === 0) {
+    if ($flag === 0) {
         //data futura
         return $result + 1;
     } else {
@@ -354,7 +365,7 @@ function date_diff_system(string $dateEnd, string $dateStart = "now"): int
     $interval = $date1->diff($date2);
     $result = $interval->days;
     $flag = $interval->invert; // 1 se data passada, 0 se data futura
-    if($flag === 0) {
+    if ($flag === 0) {
         //data futura
         return $result;
     } else {
@@ -497,4 +508,27 @@ function request_repeat(string $field, string $value): bool
 
     $session->set($field, $value);
     return false;
+}
+
+/**
+ * ###################
+ * ###   HELP   ###
+ * ###################
+ */
+function infoNegID($neg_id)
+{
+    return (new Negotiation())->findById($neg_id);
+}
+function infoClientID($client_id)
+{
+    return (new Client())->findById($client_id);
+}
+function infoSellerID($seller_id)
+{
+    return (new Seller())->findById($seller_id);
+}
+
+function infoFunnelID($funnel_id)
+{
+    return (new Funnel())->findById($funnel_id);
 }

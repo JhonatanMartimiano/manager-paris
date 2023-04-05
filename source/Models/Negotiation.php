@@ -30,9 +30,6 @@ class Negotiation extends Model
         return (new Funnel())->findById($this->funnel_id);
     }
 
-    /**
-     * @return mixed|Model|null
-     */
     public function infoClient()
     {
         return (new Client())->findById($this->client_id);
@@ -46,5 +43,20 @@ class Negotiation extends Model
     public function getClientIDNeg($id_neg)
     {
         return $this->findById($id_neg);
+    }
+
+    public function infoClientID($client_id)
+    {
+        return (new Client())->findById($client_id);
+    }
+
+    public function infoSellerID($seller_id)
+    {
+        return (new Seller())->findById($seller_id);
+    }
+
+    public function infoFunnelID($funnel_id)
+    {
+        return (new Funnel())->findById($funnel_id);
     }
 }

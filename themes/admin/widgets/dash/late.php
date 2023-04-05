@@ -95,10 +95,10 @@
                                         <?php foreach ($post24hourArr as $negPost) : ?>
                                             <tr class="bg-danger text-white">
                                                 <td>
-                                                    <a href="<?= url('/admin/negotiations/negotiation/' . $negPost->infoClient()->id); ?>" class="text-white"><?= $negPost->infoClient()->name; ?></a>
+                                                    <a href="<?= url('/admin/negotiations/negotiation/' . infoClientID($negPost->client_id)->id); ?>" class="text-white"><?= infoClientID($negPost->client_id)->name; ?></a>
                                                 </td>
-                                                <td><?= $negPost->infoSeller()->fullName(); ?></td>
-                                                <td><?= $negPost->infoFunnel()->title; ?></td>
+                                                <td><?= infoSellerID($negPost->seller_id)->fullName(); ?></td>
+                                                <td><?= infoFunnelID($negPost->funnel_id)->title; ?></td>
                                                 <td><?= date_fmt($negPost->updated_at, 'd/m/Y'); ?></td>
                                                 <td><?= date_fmt($negPost->next_contact, 'd/m/Y'); ?></td>
                                                 <td><?= $negPost->description; ?></td>
