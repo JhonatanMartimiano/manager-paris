@@ -1,4 +1,11 @@
 <?php $v->layout("_admin"); ?>
+<?php $v->start("styles"); ?>
+<style>
+    .bg-yellow {
+        background-color: #FFFF00 !important;
+    }
+</style>
+<?php $v->end("styles"); ?>
     <!--App-Content-->
     <div class="app-content  my-3 my-md-5">
         <div class="side-app">
@@ -9,7 +16,7 @@
                     <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
                 </ol>
             </div>
-            <div class="row">
+            <div class="row px-4">
                 <a href="<?= url('/admin/dash/late'); ?>" class="col-20per">
                     <div class="card overflow-hidden bg-danger">
                         <div class="card-body iconfont text-center">
@@ -56,6 +63,16 @@
                             <h5 class="text-white">Perdidos</h5>
                             <div class="d-flex justify-content-center">
                                 <h5 class="mb-0 text-white mt-1"><?= $loss; ?></h5>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="<?= url('/admin/dash/future'); ?>" class="col-20per">
+                    <div class="card overflow-hidden bg-yellow">
+                        <div class="card-body iconfont text-center">
+                            <h5 class="text-white">Futuro</h5>
+                            <div class="d-flex justify-content-center">
+                                <h5 class="mb-0 text-white mt-1"><?= $future; ?></h5>
                             </div>
                         </div>
                     </div>
@@ -483,8 +500,68 @@
                                                             </td>
                                                             <td><?= $allNegotiation->obs; ?></td>
                                                         </tr>
-                                                    <?php elseif (date_diff_panel($negotiation->getClientIDNeg($allNegotiation->id_neg)->next_contact) >= 0): ?>
+                                                    <?php elseif (date_diff_panel($negotiation->getClientIDNeg($allNegotiation->id_neg)->next_contact) >= 0 && $negotiation->getClientIDNeg($allNegotiation->id_neg)->contact_type != "PFuturo"): ?>
                                                         <tr class="bg-info text-white">
+                                                            <td>
+                                                                <a class="text-white"
+                                                                   href="<?= url('/admin/negotiations/negotiation/' . $negotiation->getClientIDNeg($allNegotiation->id_neg)->client_id); ?>"><?= $allNegotiation->cliente; ?></a>
+                                                            </td>
+                                                            <td><?= $allNegotiation->vendedor; ?></td>
+                                                            <?php if ($allNegotiation->etapa1 == "APagamento"): ?>
+                                                                <td><?= "Aguardando Pagamento"; ?></td>
+                                                            <?php elseif ($allNegotiation->etapa1 == "NRespondeu"): ?>
+                                                                <td><?= "Não Respondeu"; ?></td>
+                                                            <?php else: ?>
+                                                                <td><?= $allNegotiation->etapa1; ?></td>
+                                                            <?php endif; ?>
+                                                            <td>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Últ.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data1) ? date_fmt($allNegotiation->data1, "d/m/Y") : ""; ?></p>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Próx.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data11) ? date_fmt($allNegotiation->data11, "d/m/Y") : ""; ?></p>
+                                                            </td>
+                                                            <?php if ($allNegotiation->etapa2 == "APagamento"): ?>
+                                                                <td><?= "Aguardando Pagamento"; ?></td>
+                                                            <?php elseif ($allNegotiation->etapa2 == "NRespondeu"): ?>
+                                                                <td><?= "Não Respondeu"; ?></td>
+                                                            <?php else: ?>
+                                                                <td><?= $allNegotiation->etapa2; ?></td>
+                                                            <?php endif; ?>
+                                                            <td>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Últ.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data2) ? date_fmt($allNegotiation->data2, "d/m/Y") : ""; ?></p>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Próx.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data22) ? date_fmt($allNegotiation->data22, "d/m/Y") : ""; ?></p>
+                                                            </td>
+                                                            <?php if ($allNegotiation->etapa3 == "APagamento"): ?>
+                                                                <td><?= "Aguardando Pagamento"; ?></td>
+                                                            <?php elseif ($allNegotiation->etapa3 == "NRespondeu"): ?>
+                                                                <td><?= "Não Respondeu"; ?></td>
+                                                            <?php else: ?>
+                                                                <td><?= $allNegotiation->etapa3; ?></td>
+                                                            <?php endif; ?>
+                                                            <td>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Últ.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data3) ? date_fmt($allNegotiation->data3, "d/m/Y") : ""; ?></p>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Próx.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data33) ? date_fmt($allNegotiation->data33, "d/m/Y") : ""; ?></p>
+                                                            </td>
+                                                            <td><?= $allNegotiation->obs; ?></td>
+                                                        </tr>
+                                                        <?php elseif (date_diff_panel($negotiation->getClientIDNeg($allNegotiation->id_neg)->next_contact) >= 0 && $negotiation->getClientIDNeg($allNegotiation->id_neg)->contact_type == "PFuturo"): ?>
+                                                        <tr class="bg-yellow text-white">
                                                             <td>
                                                                 <a class="text-white"
                                                                    href="<?= url('/admin/negotiations/negotiation/' . $negotiation->getClientIDNeg($allNegotiation->id_neg)->client_id); ?>"><?= $allNegotiation->cliente; ?></a>
@@ -785,8 +862,68 @@
                                                             </td>
                                                             <td><?= $allNegotiation->obs; ?></td>
                                                         </tr>
-                                                    <?php elseif (date_diff_panel($negotiation->getClientIDNeg($allNegotiation->id_neg)->next_contact) >= 0): ?>
+                                                    <?php elseif (date_diff_panel($negotiation->getClientIDNeg($allNegotiation->id_neg)->next_contact) >= 0 && $negotiation->getClientIDNeg($allNegotiation->id_neg)->contact_type != "PFuturo"): ?>
                                                         <tr class="bg-info text-white">
+                                                            <td>
+                                                                <a class="text-white"
+                                                                   href="<?= url('/admin/negotiations/negotiation/' . $negotiation->getClientIDNeg($allNegotiation->id_neg)->client_id); ?>"><?= $allNegotiation->cliente; ?></a>
+                                                            </td>
+                                                            <td><?= $allNegotiation->vendedor; ?></td>
+                                                            <?php if ($allNegotiation->etapa1 == "APagamento"): ?>
+                                                                <td><?= "Aguardando Pagamento"; ?></td>
+                                                            <?php elseif ($allNegotiation->etapa1 == "NRespondeu"): ?>
+                                                                <td><?= "Não Respondeu"; ?></td>
+                                                            <?php else: ?>
+                                                                <td><?= $allNegotiation->etapa1; ?></td>
+                                                            <?php endif; ?>
+                                                            <td>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Últ.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data1) ? date_fmt($allNegotiation->data1, "d/m/Y") : ""; ?></p>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Próx.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data11) ? date_fmt($allNegotiation->data11, "d/m/Y") : ""; ?></p>
+                                                            </td>
+                                                            <?php if ($allNegotiation->etapa2 == "APagamento"): ?>
+                                                                <td><?= "Aguardando Pagamento"; ?></td>
+                                                            <?php elseif ($allNegotiation->etapa2 == "NRespondeu"): ?>
+                                                                <td><?= "Não Respondeu"; ?></td>
+                                                            <?php else: ?>
+                                                                <td><?= $allNegotiation->etapa2; ?></td>
+                                                            <?php endif; ?>
+                                                            <td>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Últ.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data2) ? date_fmt($allNegotiation->data2, "d/m/Y") : ""; ?></p>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Próx.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data22) ? date_fmt($allNegotiation->data22, "d/m/Y") : ""; ?></p>
+                                                            </td>
+                                                            <?php if ($allNegotiation->etapa3 == "APagamento"): ?>
+                                                                <td><?= "Aguardando Pagamento"; ?></td>
+                                                            <?php elseif ($allNegotiation->etapa3 == "NRespondeu"): ?>
+                                                                <td><?= "Não Respondeu"; ?></td>
+                                                            <?php else: ?>
+                                                                <td><?= $allNegotiation->etapa3; ?></td>
+                                                            <?php endif; ?>
+                                                            <td>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Últ.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data3) ? date_fmt($allNegotiation->data3, "d/m/Y") : ""; ?></p>
+                                                                <p class="mt-0" style="font-size: 10px; color: #ccc">Próx.
+                                                                    Contato</p>
+                                                                <p class="mt-0"
+                                                                   style="font-size: 12px"><?= ($allNegotiation->data33) ? date_fmt($allNegotiation->data33, "d/m/Y") : ""; ?></p>
+                                                            </td>
+                                                            <td><?= $allNegotiation->obs; ?></td>
+                                                        </tr>
+                                                        <?php elseif (date_diff_panel($negotiation->getClientIDNeg($allNegotiation->id_neg)->next_contact) >= 0 && $negotiation->getClientIDNeg($allNegotiation->id_neg)->contact_type == "PFuturo"): ?>
+                                                        <tr class="bg-yellow text-white">
                                                             <td>
                                                                 <a class="text-white"
                                                                    href="<?= url('/admin/negotiations/negotiation/' . $negotiation->getClientIDNeg($allNegotiation->id_neg)->client_id); ?>"><?= $allNegotiation->cliente; ?></a>

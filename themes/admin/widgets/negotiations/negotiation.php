@@ -124,6 +124,9 @@
                                             <option value="Marketing" <?= ("Marketing" == $client->lastNegotiationInfo()->contact_type) ? "selected" : ""; ?>>
                                                 Marketing
                                             </option>
+                                            <option value="PFuturo" <?= ("PFuturo" == $client->lastNegotiationInfo()->contact_type) ? "selected" : ""; ?>>
+                                                Pedido Futuro
+                                            </option>
                                         </select>
                                     </div>
                                 </div>

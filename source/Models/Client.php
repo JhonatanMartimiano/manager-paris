@@ -63,4 +63,32 @@ class Client extends Model
     {
         return (new AppState())->findById($this->state)->name;
     }
+
+    /**
+     * @param string $phone
+     * @return boolean
+     */
+    public function phoneExist(string $phone): bool
+    {
+        $find = (new Client())->find("phone = :p", "p={$phone}")->count();
+        if ($find) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @param string $phoneInt
+     * @return boolean
+     */
+    public function phoneIntExist(string $phoneInt): bool
+    {
+        $find = (new Client())->find("phone_int = :pi", "pi={$phoneInt}")->count();
+        if ($find) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

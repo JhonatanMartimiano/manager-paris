@@ -57,8 +57,75 @@ class Reports extends Admin
         );
 
         $negotiations = new Negotiation();
-        $post24hour = $negotiations->find("next_contact - CURDATE() < -1")->group("client_id")->count();
-        $inNegotiations = Connect::getInstance()->query("SELECT * FROM negotiations AS N INNER JOIN clients AS C ON N.client_id = C.id WHERE N.next_contact - CURDATE() >= 0 AND C.status != 'Concluído' AND C.reason_loss = ''")->rowCount();
+        $post24hour = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact - CURDATE() < -1
+            AND N1.contact_type != 'PFinalizado'
+            AND c.status != 'Concluído'
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $completedOrders = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.contact_type = 'PFinalizado'
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $waiting = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact - CURDATE() >= 0
+            AND (N1.contact_type = 'APagamento'
+            OR N1.contact_type = 'Orçamento'
+            OR N1.contact_type = 'Cotação')
+            AND N1.contact_type != 'PFinalizado'
+            AND N1.reason_loss = ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $inNegotiations = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact - CURDATE() >= 0
+            AND N1.contact_type != 'APagamento'
+            AND N1.contact_type != 'NRespondeu'
+            AND N1.contact_type != 'Orçamento'
+            AND N1.contact_type != 'Cotação'
+            AND N1.contact_type != 'PFinalizado'
+            AND N1.contact_type != 'PFuturo'
+            AND N1.reason_loss = ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $loss = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.reason_loss != ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $future = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact - CURDATE() >= 0
+            AND N1.contact_type != 'APagamento'
+            AND N1.contact_type != 'NRespondeu'
+            AND N1.contact_type != 'Orçamento'
+            AND N1.contact_type != 'Cotação'
+            AND N1.contact_type != 'PFinalizado'
+            AND N1.contact_type = 'PFuturo'
+            AND N1.reason_loss = ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
         $lastNegotiations = $negotiations->find()->group("client_id")->count();
 
         $userID = user()->id;
@@ -71,9 +138,11 @@ class Reports extends Admin
             "paginator" => $pager->render(),
             "lastNegotiations" => ($lastNegotiations) ?? "0",
             "post24hour" => ($post24hour) ?? "0",
-            "completedOrders" => (new Client())->find("status = 'Concluído'")->count(),
-            "waiting" => (new Negotiation())->find("contact_type = 'APagamento' OR contact_type = 'NRespondeu'")->count(),
+            "completedOrders" => $completedOrders,
+            "waiting" => $waiting,
             "inNegotiations" => ($inNegotiations) ?? "0",
+            "loss" => ($loss) ?? "0",
+            "future" => ($future) ?? "0",
             "notification" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->count(),
             "notifications" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->fetch(true)
         ]);
@@ -91,46 +160,97 @@ class Reports extends Admin
             false
         );
 
-        $clients = (new Client())->find("seller_id = :sid", "sid={$data['seller_id']}")->fetch(true);
+        $seller_id = $data["seller_id"];
+        $negotiations = new Negotiation();
+        $lastNegotiations = $negotiations->find("seller_id = :sid", "sid={$seller_id}")->group("client_id")->count();
 
-        if ($clients) {
-            foreach ($clients as $client) {
-                if ((new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count()) {
-                    $count = (new Negotiation())->find("client_id = :cid", "cid={$client->id}")->count() - 1;
-                    $lastNegotiations[] = (new Negotiation())->find("client_id = :cid",
-                        "cid={$client->id}")->fetch(true)[$count];
-                }
-            }
+        $post24hour = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.seller_id = {$seller_id}
+            AND N1.next_contact - CURDATE() < -1
+            AND N1.contact_type != 'PFinalizado'
+            AND c.status != 'Concluído'
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
 
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) < -1) {
-                        $post24hour[] = $lastNegotiations[$i];
-                    }
-                }
-            }
+        $completedOrders = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.seller_id = {$seller_id}
+            AND N1.contact_type = 'PFinalizado'
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
 
-            if ($lastNegotiations) {
-                for ($i = 0; $i < count($lastNegotiations); $i++) {
-                    if (date_diff_panel($lastNegotiations[$i]->next_contact) >= 0) {
-                        if ($lastNegotiations[$i]->infoClient()->status != "Concluído" && $lastNegotiations[$i]->infoClient()->reason_loss == "") {
-                            $inNegotiations[] = $lastNegotiations[$i];
-                        }
-                    }
-                }
-            }
-        }
+        $waiting = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact - CURDATE() >= 0
+            AND N1.seller_id = {$seller_id}
+            AND (N1.contact_type = 'APagamento'
+            OR N1.contact_type = 'Orçamento'
+            OR N1.contact_type = 'Cotação')
+            AND N1.contact_type != 'PFinalizado'
+            AND N1.reason_loss = ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $inNegotiations = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact - CURDATE() >= 0
+            AND N1.seller_id = {$seller_id}
+            AND N1.contact_type != 'APagamento'
+            AND N1.contact_type != 'NRespondeu'
+            AND N1.contact_type != 'Orçamento'
+            AND N1.contact_type != 'Cotação'
+            AND N1.contact_type != 'PFinalizado'
+            AND N1.contact_type != 'PFuturo'
+            AND N1.reason_loss = ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $loss = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.seller_id = {$seller_id}
+            AND N1.reason_loss != ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $future = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact - CURDATE() >= 0
+            AND N1.seller_id = {$seller_id}
+            AND N1.contact_type != 'APagamento'
+            AND N1.contact_type != 'NRespondeu'
+            AND N1.contact_type != 'Orçamento'
+            AND N1.contact_type != 'Cotação'
+            AND N1.contact_type != 'PFinalizado'
+            AND N1.contact_type = 'PFuturo'
+            AND N1.reason_loss = ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
 
         $userID = user()->id;
 
         echo $this->view->render("widgets/reports/seller", [
             "app" => "reports/sellers",
             "head" => $head,
-            "lastNegotiations" => ($lastNegotiations) ? count($lastNegotiations) : "0",
-            "post24hour" => ($post24hour) ? count($post24hour) : "0",
-            "completedOrders" => (new Client())->find("status = 'Concluído'")->count(),
-            "waiting" => (new Negotiation())->find("contact_type = 'APagamento' OR contact_type = 'NRespondeu'")->count(),
-            "inNegotiations" => ($inNegotiations) ? count($inNegotiations) : "0",
+            "lastNegotiations" => ($lastNegotiations) ?? "0",
+            "post24hour" => ($post24hour) ?? "0",
+            "completedOrders" => $completedOrders,
+            "waiting" => $waiting,
+            "inNegotiations" => ($inNegotiations) ?? "0",
+            "loss" => ($loss) ?? "0",
+            "future" => ($future) ?? "0",
             "notification" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->count(),
             "notifications" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->fetch(true)
         ]);

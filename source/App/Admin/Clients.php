@@ -89,11 +89,23 @@ class Clients extends Admin
             $clientCreate->city = $data["city"];
             $clientCreate->state = $data["state"];
             $clientCreate->phone = preg_replace("/[^0-9]/", "", $data["phone"]);
+            $clientCreate->phone_int = preg_replace("/[^0-9]/", "", $data["phone_int"]);
             $clientCreate->seller_id = $data["seller_id"];
-//            $clientCreate->funnel_id = $data["funnel_id"];
             $clientCreate->registration_date = date_fmt_back($data["registration_date"]);
             $clientCreate->reason_loss = "";
             $clientCreate->status = "Negociação";
+
+            if ($clientCreate->phoneExist(preg_replace("/[^0-9]/", "", $data["phone"]))) {
+                $json["message"] = $clientCreate->message()->warning("Este telefone já está cadastrado")->render();
+                echo json_encode($json);
+                return;
+            }
+
+            if ($clientCreate->phoneIntExist(preg_replace("/[^0-9]/", "", $data["phone_int"]))) {
+                $json["message"] = $clientCreate->message()->warning("Este telefone já está cadastrado")->render();
+                echo json_encode($json);
+                return;
+            }
 
             if (!$clientCreate->save()) {
                 $json["message"] = $clientCreate->message()->render();
@@ -129,6 +141,7 @@ class Clients extends Admin
             $clientUpdate->city = $data["city"];
             $clientUpdate->state = $data["state"];
             $clientUpdate->phone = preg_replace("/[^0-9]/", "", $data["phone"]);
+            $clientUpdate->phone_int = preg_replace("/[^0-9]/", "", $data["phone_int"]);
             $clientUpdate->seller_id = $data["seller_id"];
             $clientUpdate->funnel_id = $data["funnel_id"];
             $clientUpdate->registration_date = date_fmt_back($data["registration_date"]);

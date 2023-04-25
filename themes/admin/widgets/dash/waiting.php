@@ -1,4 +1,11 @@
 <?php $v->layout("_admin"); ?>
+<?php $v->start("styles"); ?>
+<style>
+    .bg-yellow {
+        background-color: #FFFF00 !important;
+    }
+</style>
+<?php $v->end("styles"); ?>
     <!--App-Content-->
     <div class="app-content  my-3 my-md-5">
         <div class="side-app">
@@ -56,6 +63,16 @@
                             <h5 class="text-white">Perdidos</h5>
                             <div class="d-flex justify-content-center">
                                 <h5 class="mb-0 text-white mt-1"><?= $loss; ?></h5>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="<?= url('/admin/dash/future'); ?>" class="col-20per">
+                    <div class="card overflow-hidden bg-yellow">
+                        <div class="card-body iconfont text-center">
+                            <h5 class="text-white">Futuro</h5>
+                            <div class="d-flex justify-content-center">
+                                <h5 class="mb-0 text-white mt-1"><?= $future; ?></h5>
                             </div>
                         </div>
                     </div>

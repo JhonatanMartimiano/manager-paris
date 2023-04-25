@@ -63,7 +63,7 @@ class Dash extends Admin
         WHERE N2.id IS NULL
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
-         Connect::getInstance()->query("SELECT N1.id
+            Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -71,7 +71,7 @@ class Dash extends Admin
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $waiting = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -96,7 +96,7 @@ class Dash extends Admin
         AND N1.contact_type != 'PFinalizado'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $inNegotiations = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -108,6 +108,7 @@ class Dash extends Admin
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
@@ -121,9 +122,10 @@ class Dash extends Admin
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $loss = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -137,6 +139,35 @@ class Dash extends Admin
         WHERE N2.id IS NULL
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $future = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.seller_id = {$seller_id}
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
 
         $query = null;
@@ -224,6 +255,7 @@ LIMIT 20
             "waiting" => ($waiting) ?? 0,
             "inNegotiations" => ($inNegotiations) ?? 0,
             "loss" => ($loss) ?? 0,
+            "future" => ($future) ?? 0,
             "allNegotiations" => $query,
             "negotiation" => (new Negotiation()),
             "newClients" => (user()->level >= 3) ? (new Client())->find("funnel_id IS NULL")->order("id DESC")->limit(10)->fetch(true) : (new Client())->find("funnel_id IS NULL AND seller_id = :sid", "sid={$seller_id}")->order("id DESC")->limit(10)->fetch(true),
@@ -272,7 +304,7 @@ LIMIT 20
         WHERE N2.id IS NULL
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
-         Connect::getInstance()->query("SELECT N1.id
+            Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -280,7 +312,7 @@ LIMIT 20
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $waiting = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -305,7 +337,7 @@ LIMIT 20
         AND N1.contact_type != 'PFinalizado'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $inNegotiations = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -317,6 +349,7 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
@@ -330,9 +363,10 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $loss = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -347,7 +381,36 @@ LIMIT 20
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
+        $future = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.seller_id = {$seller_id}
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
         $post24hour30 = (user()->level >= 3) ? Connect::getInstance()->query(
             "SELECT N1.*
             FROM negotiations N1
@@ -358,8 +421,8 @@ LIMIT 20
             AND N1.contact_type != 'PFinalizado'
             AND c.status != 'Concluído'
             ORDER BY N1.client_id, N1.id DESC LIMIT 20"
-            )->fetchAll() : Connect::getInstance()->query(
-                "SELECT N1.*
+        )->fetchAll() : Connect::getInstance()->query(
+            "SELECT N1.*
                 FROM negotiations N1
                 INNER JOIN clients c ON N1.client_id = c.id
                 LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -369,7 +432,7 @@ LIMIT 20
                 AND N1.contact_type != 'PFinalizado'
                 AND c.status != 'Concluído'
                 ORDER BY N1.client_id, N1.id DESC LIMIT 20"
-                )->fetchAll();
+        )->fetchAll();
 
         $post24hourF = null;
         if (!empty($data)) {
@@ -395,6 +458,7 @@ LIMIT 20
             "waiting" => ($waiting) ?? 0,
             "inNegotiations" => ($inNegotiations) ?? 0,
             "loss" => ($loss) ?? 0,
+            "future" => ($future) ?? 0,
             "date" => $data
         ]);
     }
@@ -429,7 +493,7 @@ LIMIT 20
         WHERE N2.id IS NULL
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
-         Connect::getInstance()->query("SELECT N1.id
+            Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -437,7 +501,7 @@ LIMIT 20
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $waiting = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -462,7 +526,7 @@ LIMIT 20
         AND N1.contact_type != 'PFinalizado'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $inNegotiations = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -474,6 +538,7 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
@@ -487,9 +552,10 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $loss = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -504,7 +570,36 @@ LIMIT 20
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
+        $future = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.seller_id = {$seller_id}
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
         $completedOrders30 = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.*
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -525,7 +620,7 @@ LIMIT 20
             $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
             $completedOrdersF = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFinalizado' AND updated_at BETWEEN '{$data['first_date']}' AND '{$data['second_date']}'")->group("client_id")->fetch(true) : $negotiations->find("contact_type = 'PFinalizado' AND updated_at BETWEEN '{$data['first_date']}' AND '{$data['second_date']}' AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->fetch(true);
         }
-        
+
         $registrationDate = (user()->level >= 3) ? (new Client())->find("registration_date - CURDATE() < -1 AND status AND status != 'Negociação'")->count() : (new Client())->find("registration_date - CURDATE() < -1 AND seller_id = :sid AND status != 'Negociação' AND status != 'Concluído'", "sid={$seller_id}")->count();
         $head = $this->seo->render(
             CONF_SITE_NAME . " | Dashboard",
@@ -543,6 +638,7 @@ LIMIT 20
             "waiting" => ($waiting) ?? 0,
             "inNegotiations" => ($inNegotiations) ?? 0,
             "loss" => ($loss) ?? 0,
+            "future" => ($future) ?? 0,
             "date" => $data
         ]);
     }
@@ -577,7 +673,7 @@ LIMIT 20
         WHERE N2.id IS NULL
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
-         Connect::getInstance()->query("SELECT N1.id
+            Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -585,7 +681,7 @@ LIMIT 20
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $waiting = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -610,7 +706,7 @@ LIMIT 20
         AND N1.contact_type != 'PFinalizado'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $inNegotiations = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -622,6 +718,7 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
@@ -635,9 +732,10 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $loss = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -652,7 +750,36 @@ LIMIT 20
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
+        $future = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.seller_id = {$seller_id}
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
         $waiting30 = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.*
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -699,6 +826,7 @@ LIMIT 20
             "waitingArr" => (!empty($data)) ? $waitF : $waiting30,
             "inNegotiations" => ($inNegotiations) ?? 0,
             "loss" => ($loss) ?? 0,
+            "future" => ($future) ?? 0,
             "date" => $data
         ]);
     }
@@ -733,7 +861,7 @@ LIMIT 20
         WHERE N2.id IS NULL
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
-         Connect::getInstance()->query("SELECT N1.id
+            Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -741,7 +869,7 @@ LIMIT 20
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $waiting = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -766,7 +894,7 @@ LIMIT 20
         AND N1.contact_type != 'PFinalizado'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $inNegotiations = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -778,6 +906,7 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
@@ -791,9 +920,10 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $loss = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -808,7 +938,36 @@ LIMIT 20
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
+        $future = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.seller_id = {$seller_id}
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
         $inNegotiations30 = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.*
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -820,6 +979,7 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC LIMIT 20")->fetchAll() : Connect::getInstance()->query("SELECT N1.*
         FROM negotiations N1
@@ -833,6 +993,7 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC LIMIT 20")->fetchAll();
 
@@ -857,6 +1018,7 @@ LIMIT 20
             "inNegotiations" => ($inNegotiations) ?? 0,
             "inNegotiationsArr" => (!empty($data)) ? $inNegotiationF : $inNegotiations30,
             "loss" => ($loss) ?? 0,
+            "future" => ($future) ?? 0,
             "date" => $data
         ]);
     }
@@ -891,7 +1053,7 @@ LIMIT 20
         WHERE N2.id IS NULL
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
-         Connect::getInstance()->query("SELECT N1.id
+            Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -899,7 +1061,7 @@ LIMIT 20
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $waiting = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -924,7 +1086,7 @@ LIMIT 20
         AND N1.contact_type != 'PFinalizado'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $inNegotiations = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -936,6 +1098,7 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
@@ -949,9 +1112,10 @@ LIMIT 20
         AND N1.contact_type != 'Orçamento'
         AND N1.contact_type != 'Cotação'
         AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
         AND N1.reason_loss = ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
         $loss = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -966,7 +1130,36 @@ LIMIT 20
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
-        
+
+        $future = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.seller_id = {$seller_id}
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
         $loss30 = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.*
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
@@ -1004,7 +1197,204 @@ LIMIT 20
             "inNegotiations" => ($inNegotiations) ?? 0,
             "waitingArr" => $waiting,
             "loss" => ($loss) ?? 0,
+            "future" => ($future) ?? 0,
             "lossArr" => (!empty($data)) ? $lossNF : $loss30,
+            "date" => $data
+        ]);
+    }
+
+    public
+    function future(?array $data)
+    {
+        $seller_id = \user()->seller_id;
+        $negotiations = new Negotiation();
+        $post24hour = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() < -1
+        AND N1.contact_type != 'PFinalizado'
+        AND c.status != 'Concluído'
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.seller_id = {$seller_id}
+        AND N1.next_contact - CURDATE() < -1
+        AND N1.contact_type != 'PFinalizado'
+        AND c.status != 'Concluído'
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $completedOrders = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.contact_type = 'PFinalizado'
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() :
+            Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.seller_id = {$seller_id}
+        AND N1.contact_type = 'PFinalizado'
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $waiting = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND (N1.contact_type = 'APagamento'
+        OR N1.contact_type = 'Orçamento'
+        OR N1.contact_type = 'Cotação')
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.seller_id = {$seller_id}
+        AND (N1.contact_type = 'APagamento'
+        OR N1.contact_type = 'Orçamento'
+        OR N1.contact_type = 'Cotação')
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $inNegotiations = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.seller_id = {$seller_id}
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type != 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $loss = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.reason_loss != ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.seller_id = {$seller_id}
+        AND N1.reason_loss != ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $future = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.seller_id = {$seller_id}
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC")->rowCount();
+
+        $inNegotiations30 = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.*
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC LIMIT 20")->fetchAll() : Connect::getInstance()->query("SELECT N1.*
+        FROM negotiations N1
+        INNER JOIN clients c ON N1.client_id = c.id
+        LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+        WHERE N2.id IS NULL
+        AND N1.next_contact - CURDATE() >= 0
+        AND N1.seller_id = {$seller_id}
+        AND N1.contact_type != 'APagamento'
+        AND N1.contact_type != 'NRespondeu'
+        AND N1.contact_type != 'Orçamento'
+        AND N1.contact_type != 'Cotação'
+        AND N1.contact_type != 'PFinalizado'
+        AND N1.contact_type = 'PFuturo'
+        AND N1.reason_loss = ''
+        ORDER BY N1.client_id, N1.id DESC LIMIT 20")->fetchAll();
+
+        $inNegotiationF = null;
+        if (!empty($data)) {
+            $inNegotiationF = (user()->level >= 3) ? $negotiations->find("contact_type = 'PFuturo' AND updated_at - CURDATE() >= -30 AND updated_at BETWEEN '{$data['first_date']}' AND '{$data['second_date']}'")->group("client_id")->limit(20)->fetch(true) : $negotiations->find("contact_type != 'PFuturo' AND updated_at - CURDATE() >= -30 AND updated_at BETWEEN '{$data['first_date']}' AND '{$data['second_date']}' AND seller_id = :sid", "sid={$seller_id}")->group("client_id")->limit(20)->fetch(true);
+        }
+
+        $registrationDate = (user()->level >= 3) ? (new Client())->find("registration_date - CURDATE() < -1 AND status AND status != 'Negociação'")->count() : (new Client())->find("registration_date - CURDATE() < -1 AND seller_id = :sid AND status != 'Negociação' AND status != 'Concluído'", "sid={$seller_id}")->count();
+
+        $head = $this->seo->render(
+            CONF_SITE_NAME . " | Dashboard",
+            CONF_SITE_DESC,
+            url("/admin"),
+            theme("/assets/images/image.jpg", CONF_VIEW_ADMIN),
+            false
+        );
+        echo $this->view->render('widgets/dash/future', [
+            'app' => 'dash',
+            'head' => $head,
+            "post24hour" => ($post24hour) ?? $registrationDate,
+            "completedOrders" => ($completedOrders) ?? 0,
+            "waiting" => ($waiting) ?? 0,
+            "inNegotiations" => ($inNegotiations) ?? 0,
+            "waitingArr" => $waiting,
+            "loss" => ($loss) ?? 0,
+            "future" => ($future) ?? 0,
+            "futureArr" => (!empty($data)) ? $inNegotiationF : $inNegotiations30,
             "date" => $data
         ]);
     }

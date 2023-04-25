@@ -89,7 +89,7 @@
                     name: 'Atrasados 24H+',
                     data: [<?= number_format($post24hour * 100 / $lastNegotiations, 2); ?>],
                     color: "#ff382b"
-                },
+                    },
                     {
                         name: 'Pedidos Finalizados',
                         data: [<?= number_format($completedOrders * 100 / $lastNegotiations, 2); ?>],
@@ -104,6 +104,16 @@
                         name: 'Em Negociação',
                         data: [<?= number_format($inNegotiations * 100 / $lastNegotiations, 2); ?>],
                         color: "#1da1f3"
+                    },
+                    {
+                        name: 'Perdidos',
+                        data: [<?= number_format($loss * 100 / $lastNegotiations, 2); ?>],
+                        color: "#6d33ff"
+                    },
+                    {
+                        name: 'Futuro',
+                        data: [<?= number_format($future * 100 / $lastNegotiations, 2); ?>],
+                        color: "#ffff00"
                     }
                 ],
                 chart: {
@@ -131,7 +141,7 @@
                 },
 
                 xaxis: {
-                    categories: ["Atrasados 24H+", "Pedidos Finalizados", "Aguardando", "Em Negociação"],
+                    categories: ["Atrasados 24H+", "Pedidos Finalizados", "Aguardando", "Em Negociação", "Perdidos", "Futuro"],
                     position: 'top',
                     axisBorder: {
                         show: false

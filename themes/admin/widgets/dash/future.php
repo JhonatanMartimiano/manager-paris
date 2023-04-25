@@ -87,7 +87,7 @@
                         <div class="card-body">
                             <div class="d-flex flex-column align-items-center justify-content-center">
                                 <h4>Último Contato</h4>
-                                <form class="form-inline ajax_off mb-1" action="<?= url('/admin/dash/inNegotiations'); ?>"
+                                <form class="form-inline ajax_off mb-1" action="<?= url('/admin/dash/future'); ?>"
                                       method="post">
                                     <div class="nav-search">
                                         <input type="date" class="form-control header-search mr-2" name="first_date"
@@ -108,20 +108,29 @@
                                         <th>Último Contato</th>
                                         <th>Próximo Contato</th>
                                         <th>Descrição</th>
+                                        <th>Ações</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <?php if ($inNegotiationsArr): ?>
-                                        <?php foreach ($inNegotiationsArr as $negInNegotiations): ?>
-                                            <tr class="bg-info text-white">
+                                    <?php if ($futureArr): ?>
+                                        <?php foreach ($futureArr as $negFuture): ?>
+                                            <tr class="bg-yellow text-white">
                                                 <td>
-                                                    <a href="<?= url('/admin/negotiations/negotiation/' . infoClientID($negInNegotiations->client_id)->id); ?>" class="text-white"><?= infoClientID($negInNegotiations->client_id)->name; ?></a>
+                                                    <a href="<?= url('/admin/negotiations/negotiation/' . infoClientID($negFuture->client_id)->id); ?>" class="text-white"><?= infoClientID($negFuture->client_id)->name; ?></a>
                                                 </td>
-                                                <td><?= infoSellerID($negInNegotiations->seller_id)->fullName(); ?></td>
-                                                <td><?= infoFunnelID($negInNegotiations->funnel_id)->title; ?></td>
-                                                <td><?= date_fmt($negInNegotiations->updated_at, 'd/m/Y'); ?></td>
-                                                <td><?= date_fmt($negInNegotiations->next_contact, 'd/m/Y'); ?></td>
-                                                <td><?= $negInNegotiations->description; ?></td>
+                                                <td><?= infoSellerID($negFuture->seller_id)->fullName(); ?></td>
+                                                <td><?= infoFunnelID($negFuture->funnel_id)->title; ?></td>
+                                                <td><?= date_fmt($negFuture->updated_at, 'd/m/Y'); ?></td>
+                                                <td><?= date_fmt($negFuture->next_contact, 'd/m/Y'); ?></td>
+                                                <td><?= $negFuture->description; ?></td>
+                                                <td>
+                                                    <a href="#" class="btn btn-danger btn-sm"
+                                                    data-post="<?= url("/admin/users/user/{$user->id}"); ?>"
+                                                    data-action="delete"
+                                                    data-confirm="ATENÇÃO: Tem certeza que deseja excluir o usuário e todos os dados relacionados a ele? Essa ação não pode ser feita!"
+                                                    data-user_id="<?= $user->id; ?>" title="Excluir"><i
+                                                        class="fa fa-trash"></i></a>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>

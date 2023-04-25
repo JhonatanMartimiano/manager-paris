@@ -44,7 +44,7 @@
     <link rel="stylesheet" type="text/css" href="<?= url('/shared/styles/styles.css'); ?>"/>
     <link rel="stylesheet" type="text/css" href="<?= url('/shared/styles/message.css'); ?>"/>
     <link rel="stylesheet" type="text/css" href="<?= theme('/assets/css/custom.css', CONF_VIEW_ADMIN); ?>"/>
-
+    <?= $v->section("styles"); ?>
 </head>
 
 <body class="app sidebar-mini">

@@ -38,13 +38,18 @@
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-4">
                                         <label>Cidade</label>
                                         <select name="city" class="form-control selectCity"></select>
                                     </div>
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-4">
                                         <label>Telefone</label>
                                         <input type="text" class="form-control mask-phone" name="phone"
+                                               placeholder="Digite seu telefone">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Telefone Internacional</label>
+                                        <input type="text" class="form-control mask-phone-int" name="phone_int"
                                                placeholder="Digite seu telefone">
                                     </div>
                                     <?php if ($sellers): ?>
@@ -124,16 +129,21 @@
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-4">
                                         <label>Cidade</label>
                                         <select name="city" class="form-control selectCity">
                                             <option value="<?= $client->city; ?>"><?= $client->cityName(); ?></option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-4">
                                         <label>Telefone</label>
                                         <input type="text" class="form-control mask-phone" name="phone"
                                                value="<?= $client->phone; ?>"
+                                               placeholder="Digite seu telefone">
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Telefone Internacional</label>
+                                        <input type="text" class="form-control mask-phone-int" name="phone_int" value="<?= $client->phone_int; ?>"
                                                placeholder="Digite seu telefone">
                                     </div>
                                     <div class="col-12 col-sm-6">

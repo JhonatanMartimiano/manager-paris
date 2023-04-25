@@ -23,12 +23,6 @@ $route->group("/admin");
 $route->get("/", "Login:root");
 $route->get("/login", "Login:login");
 $route->post("/login", "Login:login");
-// $route->get("/register", "Login:register");
-// $route->post("/register", "Login:register");
-// $route->get("/forget", "Web:forget");
-// $route->post("/forget", "Web:forget");
-// $route->get("/forget/{code}", "Web:reset");
-// $route->post("/forget/reset", "Web:reset");
 //dash
 $route->get("/dash", "Dash:dash");
 $route->get("/dash/home", "Dash:home");
@@ -44,6 +38,8 @@ $route->get("/dash/inNegotiations", "Dash:inNegotiations");
 $route->post("/dash/inNegotiations", "Dash:inNegotiations");
 $route->get("/dash/loss", "Dash:loss");
 $route->post("/dash/loss", "Dash:loss");
+$route->get("/dash/future", "Dash:future");
+$route->post("/dash/future", "Dash:future");
 //users
 $route->get("/users/home", "Users:home");
 $route->post("/users/home", "Users:home");
