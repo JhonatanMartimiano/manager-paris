@@ -58,6 +58,14 @@ class Seller extends Model
     }
 
     /**
+     * @return Notification|null
+     */
+    public function notification(): ?Notification
+    {
+        return (new Notification())->find("seller_id = :sid", "sid={$this->id}")->fetch();
+    }
+
+    /**
      * @return bool
      */
     public function save(): bool

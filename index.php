@@ -94,6 +94,9 @@ $route->get("/messages/message/{message_id}", "Messages:message");
 $route->post("/messages/message/{message_id}", "Messages:message");
 $route->get("/messages/sends", "Messages:sends");
 $route->get("/messages/response/{message_id}", "Messages:response");
+//notifications
+$route->get("/notifications/notification/{seller_id}", "Notifications:notification");
+$route->post("/notifications/notification", "Notifications:notification");
 /**
  * ERROR ROUTES
  */

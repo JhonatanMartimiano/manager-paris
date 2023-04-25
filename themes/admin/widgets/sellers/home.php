@@ -1,4 +1,58 @@
 <?php $v->layout("_admin"); ?>
+<?php $v->start("styles"); ?>
+<style>
+    .toggle {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .toggle input {
+        display: none;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #FF382B;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked+.slider {
+        background-color: #039E26;
+    }
+
+    input:focus+.slider {
+        box-shadow: 0 0 1px #039E26;
+    }
+
+    input:checked+.slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+</style>
+<?php $v->end("styles"); ?>
 <!--App-Content-->
 <div class="app-content  my-3 my-md-5">
     <div class="side-app">
@@ -17,8 +71,7 @@
                         <div class="d-flex justify-content-between align-items-center w-100">
                             <h3 class="card-title">Vendedores</h3>
                             <div>
-                                <a href="<?= url('/admin/sellers/seller'); ?>" class="btn btn-pill btn-success"><i
-                                        class="fa fa-plus"></i> Adicionar Vendedor</a>
+                                <a href="<?= url('/admin/sellers/seller'); ?>" class="btn btn-pill btn-success"><i class="fa fa-plus"></i> Adicionar Vendedor</a>
                             </div>
                         </div>
                     </div>
@@ -26,8 +79,7 @@
                         <div class="table-responsive">
                             <form class="form-inline mb-1" action="<?= url('/admin/sellers/home'); ?>" method="post">
                                 <div class="nav-search">
-                                    <input type="search" class="form-control header-search" name="s"
-                                        value="<?= $search; ?>" placeholder="Buscar…" aria-label="Search">
+                                    <input type="search" class="form-control header-search" name="s" value="<?= $search; ?>" placeholder="Buscar…" aria-label="Search">
                                     <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></button>
                                 </div>
                             </form>
@@ -42,25 +94,20 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if ($sellers): ?>
-                                        <?php foreach ($sellers as $seller): ?>
+                                    <?php if ($sellers) : ?>
+                                        <?php foreach ($sellers as $seller) : ?>
                                             <tr>
                                                 <th scope="row"><?= $seller->id; ?></th>
                                                 <td><?= $seller->fullName(); ?></td>
                                                 <td><?= $seller->email; ?></td>
                                                 <td class="mask-doc"><?= $seller->cpf; ?></td>
                                                 <td align="center">
-                                                    <?php if (user()->level >= 5): ?>
-                                                        <a href="<?= url('/admin/sellers/seller/'.$seller->id); ?>"
-                                                           class="btn btn-info btn-sm" title="Editar"><i
-                                                                    class="fa fa-pencil"></i></a>
+                                                    <?php if (user()->level >= 5) : ?>
+                                                        <a href="<?= url('/admin/sellers/seller/' . $seller->id); ?>" class="btn btn-info btn-sm" title="Editar"><i class="fa fa-pencil"></i></a>
 
-                                                        <a href="#" class="btn btn-danger btn-sm"
-                                                           data-post="<?= url("/admin/sellers/seller/{$seller->id}"); ?>"
-                                                           data-action="delete"
-                                                           data-confirm="ATENÇÃO: Tem certeza que deseja excluir o vendedor e todos os dados relacionados a ele? Essa ação não pode ser feita!"
-                                                           data-seller_id="<?= $seller->id; ?>" title="Excluir"><i
-                                                                    class="fa fa-trash"></i></a>
+                                                        <a href="#" class="btn btn-danger btn-sm" data-post="<?= url("/admin/sellers/seller/{$seller->id}"); ?>" data-action="delete" data-confirm="ATENÇÃO: Tem certeza que deseja excluir o vendedor e todos os dados relacionados a ele? Essa ação não pode ser feita!" data-seller_id="<?= $seller->id; ?>" title="Excluir"><i class="fa fa-trash"></i></a>
+
+                                                        <a href="#" class="btn-modal-notification btn btn-light btn-sm" title="Notificar" data-toggle="modal" data-target="#modalNotification" data-seller_id="<?= $seller->id; ?>"><i class="fa fa-bell"></i></a>
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>
@@ -74,6 +121,35 @@
                 </div>
             </div>
         </div>
+        <!-- Modal -->
+        <div class="modal fade" id="modalNotification" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="modalNotificationLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalNotificationLabel"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <textarea name="content" cols="30" rows="10" class="form-control"></textarea>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" name="status">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-success">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <!--/App-Content-->
+<?php $v->start("scripts"); ?>
+<script src="<?= theme("/assets/js/custom/seller-notification.js", CONF_VIEW_ADMIN); ?>"></script>
+<?php $v->end("scripts"); ?>

@@ -9,6 +9,7 @@
 use Source\Models\Client;
 use Source\Models\Funnel;
 use Source\Models\Negotiation;
+use Source\Models\Notification;
 use Source\Models\Seller;
 
 /**
@@ -511,9 +512,9 @@ function request_repeat(string $field, string $value): bool
 }
 
 /**
- * ###################
+ * ################
  * ###   HELP   ###
- * ###################
+ * ################
  */
 function infoNegID($neg_id)
 {
@@ -531,4 +532,16 @@ function infoSellerID($seller_id)
 function infoFunnelID($funnel_id)
 {
     return (new Funnel())->findById($funnel_id);
+}
+
+/**
+ * ########################
+ * ###   NOTIFICATION   ###
+ * ########################
+ */
+
+ function notification()
+{
+    $sellerID = user()->seller_id;
+    return (new Notification())->find("seller_id = :sid", "sid={$sellerID}")->fetch();
 }
