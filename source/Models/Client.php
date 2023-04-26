@@ -18,7 +18,7 @@ class Client extends Model
     public function __construct()
     {
         parent::__construct("clients", ["id"],
-            ["name","city", "state", "phone", "seller_id", "registration_date"]);
+            ["name","city", "state", "seller_id", "registration_date"]);
     }
 
     /**

@@ -81,6 +81,10 @@
                                         <input type="text" class="form-control mask-date" name="registration_date"
                                                placeholder="Digite sua data">
                                     </div>
+                                    <div class="form-group col-md-12">
+                                        <label>Observação</label>
+                                        <textarea name="observation" cols="30" rows="10" class="form-control"></textarea>
+                                    </div>
                                 </div>
                                 <button type="submit" class="btn btn-success ">Criar</button>
                             </form>
@@ -171,6 +175,10 @@
                                         <input type="text" class="form-control mask-date" name="registration_date"
                                                value="<?= date_fmt($client->registration_date, "d/m/Y"); ?>"
                                                placeholder="Digite sua data">
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <label>Observação</label>
+                                        <textarea name="observation" cols="30" rows="10" class="form-control"><?= $client->observation ?></textarea>
                                     </div>
                                 </div>
                                 <button type="submit" class="btn btn-success ">Atualizar</button>

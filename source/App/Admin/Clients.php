@@ -88,12 +88,19 @@ class Clients extends Admin
             $clientCreate->name = $data["name"];
             $clientCreate->city = $data["city"];
             $clientCreate->state = $data["state"];
-            $clientCreate->phone = preg_replace("/[^0-9]/", "", $data["phone"]);
-            $clientCreate->phone_int = preg_replace("/[^0-9]/", "", $data["phone_int"]);
+            $clientCreate->phone = $data["phone"] ? preg_replace("/[^0-9]/", "", $data["phone"]) : null;
+            $clientCreate->phone_int = $data["phone_int"] ? preg_replace("/[^0-9]/", "", $data["phone_int"]) : null;
             $clientCreate->seller_id = $data["seller_id"];
             $clientCreate->registration_date = date_fmt_back($data["registration_date"]);
             $clientCreate->reason_loss = "";
             $clientCreate->status = "Negociação";
+            $clientCreate->observation = $data["observation"];
+
+            if (!$data["phone"] && !$data["phone_int"]) {
+                $json["message"] = $clientCreate->message()->warning("É preciso preencher um dos campos de contato")->render();
+                echo json_encode($json);
+                return;
+            }
 
             if ($clientCreate->phoneExist(preg_replace("/[^0-9]/", "", $data["phone"]))) {
                 $json["message"] = $clientCreate->message()->warning("Este telefone já está cadastrado")->render();
@@ -140,11 +147,19 @@ class Clients extends Admin
             $clientUpdate->name = $data["name"];
             $clientUpdate->city = $data["city"];
             $clientUpdate->state = $data["state"];
-            $clientUpdate->phone = preg_replace("/[^0-9]/", "", $data["phone"]);
-            $clientUpdate->phone_int = preg_replace("/[^0-9]/", "", $data["phone_int"]);
+            $clientUpdate->phone = $data["phone"] ? preg_replace("/[^0-9]/", "", $data["phone"]) : null;
+            $clientUpdate->phone_int = $data["phone_int"] ? preg_replace("/[^0-9]/", "", $data["phone_int"]) : null;
             $clientUpdate->seller_id = $data["seller_id"];
             $clientUpdate->funnel_id = $data["funnel_id"];
             $clientUpdate->registration_date = date_fmt_back($data["registration_date"]);
+            $clientUpdate->observation = $data["observation"];
+
+            if (!$data["phone"] && !$data["phone_int"]) {
+                $json["message"] = $clientUpdate->message()->warning("É preciso preencher um dos campos de contato")->render();
+                echo json_encode($json);
+                return;
+            }
+
 
             if (!$clientUpdate->save()) {
                 $json["message"] = $clientUpdate->message()->render();
