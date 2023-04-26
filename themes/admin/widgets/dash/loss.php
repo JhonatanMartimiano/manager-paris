@@ -17,7 +17,7 @@
             </ol>
         </div>
         <div class="row">
-            <a href="<?= url('/admin/dash/late'); ?>" class="col-20per">
+            <a href="<?= url('/admin/dash/late'); ?>" class="col-md-2">
                 <div class="card overflow-hidden bg-danger">
                     <div class="card-body iconfont text-center">
                         <h5 class="text-white">Atrasados 24H+</h5>
@@ -27,7 +27,7 @@
                     </div>
                 </div>
             </a>
-            <a href="<?= url('/admin/dash/completed'); ?>" class="col-20per">
+            <a href="<?= url('/admin/dash/completed'); ?>" class="col-md-2">
                 <div class="card overflow-hidden bg-success">
                     <div class="card-body iconfont text-center">
                         <h5 class="text-white">Finalizados</h5>
@@ -37,7 +37,7 @@
                     </div>
                 </div>
             </a>
-            <a href="<?= url('/admin/dash/waiting'); ?>" class="col-20per">
+            <a href="<?= url('/admin/dash/waiting'); ?>" class="col-md-2">
                 <div class="card overflow-hidden bg-warning">
                     <div class="card-body iconfont text-center">
                         <h5 class="text-white">Aguardando</h5>
@@ -47,7 +47,7 @@
                     </div>
                 </div>
             </a>
-            <a href="<?= url('/admin/dash/inNegotiations'); ?>" class="col-20per">
+            <a href="<?= url('/admin/dash/inNegotiations'); ?>" class="col-md-2">
                 <div class="card overflow-hidden bg-info">
                     <div class="card-body iconfont text-center">
                         <h5 class="text-white">Em Negociação</h5>
@@ -57,7 +57,7 @@
                     </div>
                 </div>
             </a>
-            <a href="<?= url('/admin/dash/loss'); ?>" class="col-20per">
+            <a href="<?= url('/admin/dash/loss'); ?>" class="col-md-2">
                 <div class="card overflow-hidden bg-purple">
                     <div class="card-body iconfont text-center">
                         <h5 class="text-white">Perdidos</h5>
@@ -67,7 +67,7 @@
                     </div>
                 </div>
             </a>
-            <a href="<?= url('/admin/dash/future'); ?>" class="col-20per">
+            <a href="<?= url('/admin/dash/future'); ?>" class="col-md-2">
                 <div class="card overflow-hidden bg-yellow">
                     <div class="card-body iconfont text-center">
                         <h5 class="text-white">Futuro</h5>
@@ -122,7 +122,7 @@
                                                 <td><?= $negLoss->description; ?></td>
                                                 <?php if (user()->level >= 5) : ?>
                                                     <td>
-                                                        <a href="#" class="btn btn-danger btn-sm" data-post="<?= url("/admin/clients/delete/{$negLoss->client_id}"); ?>" data-action="delete" data-confirm="ATENÇÃO: Tem certeza que deseja excluir o cliente e todos os dados relacionados a ele? Essa ação não pode ser feita!" data-client_id="<?= $negLoss->client_id; ?>" title="Excluir"><i class="fa fa-trash"></i></a>
+                                                        <a href="#" class="btn btn-danger btn-sm" data-post="<?= url("/admin/clients/delete/{$negLoss->client_id}"); ?>" data-action="delete" data-confirm="ATENÇÃO: Tem certeza que deseja excluir a negociação relacionada ao cliente? Essa ação não pode ser desfeita!" data-client_id="<?= $negLoss->client_id; ?>" title="Excluir"><i class="fa fa-trash"></i></a>
                                                     </td>
                                                 <?php endif; ?>
                                             </tr>

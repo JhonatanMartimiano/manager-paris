@@ -1,4 +1,11 @@
 <?php $v->layout("_admin"); ?>
+<?php $v->start("styles"); ?>
+<style>
+    .bg-yellow {
+        background-color: #FFFF00 !important;
+    }
+</style>
+<?php $v->end("styles"); ?>
 <!--App-Content-->
 <div class="app-content  my-3 my-md-5">
     <div class="side-app">
@@ -38,9 +45,14 @@
                                     <h5 class="text-white">Em Negociação</h5>
                                 </div>
                             </div>
-                            <div class="bg-purple">
+                            <div class="bg-purple mr-1">
                                 <div class="card-body iconfont text-center">
                                     <h5 class="text-white">Perdidos</h5>
+                                </div>
+                            </div>
+                            <div class="bg-yellow">
+                                <div class="card-body iconfont text-center">
+                                    <h5 class="text-white">Futuro</h5>
                                 </div>
                             </div>
                         </div>
@@ -126,6 +138,19 @@
                                                                 </div>
                                                             <?php elseif ($client->lastNegotiationInfo()->contact_type == "APagamento" || $client->lastNegotiationInfo()->contact_type == "Orçamento" || $client->lastNegotiationInfo()->contact_type == "Cotação"): ?>
                                                                 <div class="border rounded text-white bg-warning">
+                                                                    <p class="m-0 text-center font-weight-bold" style="font-size: 12px">Cliente:</p>
+                                                                    <p class="m-0 text-center"><?= $client->name; ?></p>
+                                                                    <p class="m-0 text-center font-weight-bold" style="font-size: 12px">Vendedor:</p>
+                                                                    <p class="m-0 text-center"><?= $client->sellerName(); ?></p>
+                                                                    <p class="m-0 text-center font-weight-bold" style="font-size: 12px">Data do Cadastro:</p>
+                                                                    <p class="m-0 text-center"><?= date_fmt($client->registration_date,
+                                                                            "d/m/Y"); ?></p>
+                                                                    <p class="m-0 text-center font-weight-bold" style="font-size: 12px">Data do Próximo Contato:</p>
+                                                                    <p class="m-0 text-center"><?= ($client->lastNegotiationInfo()->next_contact) ? date_fmt($client->lastNegotiationInfo()->next_contact,
+                                                                            "d/m/Y") : "Não informado."; ?></p>
+                                                                </div>
+                                                                <?php elseif ($client->lastNegotiationInfo()->contact_type == "PFuturo"): ?>
+                                                                <div class="border rounded text-white bg-yellow">
                                                                     <p class="m-0 text-center font-weight-bold" style="font-size: 12px">Cliente:</p>
                                                                     <p class="m-0 text-center"><?= $client->name; ?></p>
                                                                     <p class="m-0 text-center font-weight-bold" style="font-size: 12px">Vendedor:</p>

@@ -17,7 +17,7 @@
                 </ol>
             </div>
             <div class="row px-4">
-                <a href="<?= url('/admin/dash/late'); ?>" class="col-20per">
+                <a href="<?= url('/admin/dash/late'); ?>" class="col-md-2">
                     <div class="card overflow-hidden bg-danger">
                         <div class="card-body iconfont text-center">
                             <h5 class="text-white">Atrasados 24H+</h5>
@@ -27,7 +27,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="<?= url('/admin/dash/completed'); ?>" class="col-20per">
+                <a href="<?= url('/admin/dash/completed'); ?>" class="col-md-2">
                     <div class="card overflow-hidden bg-success">
                         <div class="card-body iconfont text-center">
                             <h5 class="text-white">Finalizados</h5>
@@ -37,7 +37,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="<?= url('/admin/dash/waiting'); ?>" class="col-20per">
+                <a href="<?= url('/admin/dash/waiting'); ?>" class="col-md-2">
                     <div class="card overflow-hidden bg-warning">
                         <div class="card-body iconfont text-center">
                             <h5 class="text-white">Aguardando</h5>
@@ -47,7 +47,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="<?= url('/admin/dash/inNegotiations'); ?>" class="col-20per">
+                <a href="<?= url('/admin/dash/inNegotiations'); ?>" class="col-md-2">
                     <div class="card overflow-hidden bg-info">
                         <div class="card-body iconfont text-center">
                             <h5 class="text-white">Em Negociação</h5>
@@ -57,7 +57,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="<?= url('/admin/dash/loss'); ?>" class="col-20per">
+                <a href="<?= url('/admin/dash/loss'); ?>" class="col-md-2">
                     <div class="card overflow-hidden bg-purple">
                         <div class="card-body iconfont text-center">
                             <h5 class="text-white">Perdidos</h5>
@@ -67,7 +67,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="<?= url('/admin/dash/future'); ?>" class="col-20per">
+                <a href="<?= url('/admin/dash/future'); ?>" class="col-md-2">
                     <div class="card overflow-hidden bg-yellow">
                         <div class="card-body iconfont text-center">
                             <h5 class="text-white">Futuro</h5>
