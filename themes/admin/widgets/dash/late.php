@@ -105,6 +105,7 @@
                                         <th>Último Contato</th>
                                         <th>Próximo Contato</th>
                                         <th>Descrição</th>
+                                        <th>Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -119,6 +120,11 @@
                                                 <td><?= date_fmt($negPost->updated_at, 'd/m/Y'); ?></td>
                                                 <td><?= date_fmt($negPost->next_contact, 'd/m/Y'); ?></td>
                                                 <td><?= $negPost->description; ?></td>
+                                                <?php if (user()->level >= 5) : ?>
+                                                    <td>
+                                                        <a href="#" class="btn btn-danger btn-sm" data-post="<?= url("/admin/clients/delete/{$negPost->client_id}"); ?>" data-action="delete" data-confirm="ATENÇÃO: Tem certeza que deseja excluir o cliente e todos os dados relacionados a ele? Essa ação não pode ser feita!" data-client_id="<?= $negPost->client_id; ?>" title="Excluir"><i class="fa fa-trash"></i></a>
+                                                    </td>
+                                                <?php endif; ?>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php endif; ?>

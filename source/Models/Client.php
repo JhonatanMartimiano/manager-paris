@@ -42,6 +42,21 @@ class Client extends Model
         return $find->fetch(true)[$count];
     }
 
+    /**
+     * @return boolean
+     */
+    public function deleteAllNegotiations(): bool
+    {
+        $negotiations = (new Negotiation())->find("client_id = :cid", "cid={$this->id}")->fetch(true);
+        if ($negotiations) {
+            foreach ($negotiations as $negotiation) {
+                $negotiation->destroy();
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function funnelNewClients()
     {
         if (user()->level >= 3) {

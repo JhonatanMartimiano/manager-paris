@@ -539,8 +539,10 @@ function infoFunnelID($funnel_id)
  * ###   NOTIFICATION   ###
  * ########################
  */
-
- function notification()
+/**
+ * @return Notification|null
+ */
+ function notification(): ?Notification
 {
     $sellerID = user()->seller_id;
     return (new Notification())->find("seller_id = :sid", "sid={$sellerID}")->fetch();

@@ -64,6 +64,7 @@ $route->get("/clients/client", "Clients:client");
 $route->post("/clients/client", "Clients:client");
 $route->get("/clients/client/{client_id}", "Clients:client");
 $route->post("/clients/client/{client_id}", "Clients:client");
+$route->post("/clients/delete/{client_id}", "Clients:delete");
 //states and cities
 $route->post("/clients/address/{state_id}", "Clients:address");
 //general premises

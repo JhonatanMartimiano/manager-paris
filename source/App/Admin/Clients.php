@@ -223,4 +223,27 @@ class Clients extends Admin
             echo json_encode($json);
         }
     }
+
+    public function delete(?array $data)
+    {
+        if ($data && $data["action"] == "delete") {
+            $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
+            $clientDelete = (new Client())->findById($data["client_id"]);
+
+            if (!$clientDelete) {
+                $this->message->error("Você tentnou deletar um cliente que não existe")->flash();
+                echo json_encode(["redirect" => url("/admin/clients/home")]);
+                return;
+            }
+
+            $clientDelete->deleteAllNegotiations();
+
+            $clientDelete->destroy();
+
+            $this->message->success("O cliente e sua negociações foram excluído com sucesso...")->flash();
+            echo json_encode(["redirect" => url("/admin/dash/home")]);
+
+            return;
+        }
+    }
 }

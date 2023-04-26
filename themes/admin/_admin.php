@@ -217,23 +217,21 @@
 
         <button class="btn-global-modal-notification d-none" data-toggle="modal" data-target="#modalNotificationGlobal"></button>
         <!-- Modal -->
-        <div class="modal fade" id="modalNotificationGlobal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="modalNotificationGlobalLabel" aria-hidden="true">
+        <div class="modal fade" id="modalNotificationGlobal" data-backdrop="static" data-notification-status="<?= (notification()) ? notification()->status : 'inactive' ?>" data-keyboard="false" tabindex="-1" aria-labelledby="modalNotificationGlobalLabel" aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content">
+                <div class="modal-content bg-danger">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalNotificationGlobalLabel">Notificação</h5>
+                        <h5 class="modal-title text-white" id="modalNotificationGlobalLabel">Notificação</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                            <span class="text-white" aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
                         <div class="d-flex justify-content-center">
-                            <span class="text-warning fa fa-warning" style="font-size: 3em;"></span>
+                            <span class="text-white fa fa-warning" style="font-size: 3em;"></span>
                         </div>
-                        <p><?= notification()->content ?></p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">Fechar</button>
+                            <p class="text-white"><?= notification()->content ?></p>
+                        </div>
                     </div>
                 </div>
             </div>
