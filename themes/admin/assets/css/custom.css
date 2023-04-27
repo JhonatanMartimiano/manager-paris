@@ -12,3 +12,7 @@
 .col-20per {
     width: 20%;
 }
+
+.bg-dark {
+    background-color: #000 !important;
+}

@@ -113,7 +113,7 @@
                     {
                         name: 'Futuro',
                         data: [<?= number_format($future * 100 / $lastNegotiations, 2); ?>],
-                        color: "#ffff00"
+                        color: "#000"
                     }
                 ],
                 chart: {

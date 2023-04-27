@@ -1,11 +1,4 @@
 <?php $v->layout("_admin"); ?>
-<?php $v->start("styles"); ?>
-<style>
-    .bg-yellow {
-        background-color: #FFFF00 !important;
-    }
-</style>
-<?php $v->end("styles"); ?>
 <!--App-Content-->
 <div class="app-content  my-3 my-md-5">
     <div class="side-app">
@@ -68,7 +61,7 @@
                 </div>
             </a>
             <a href="<?= url('/admin/dash/future'); ?>" class="col-md-2">
-                <div class="card overflow-hidden bg-yellow">
+                <div class="card overflow-hidden bg-dark">
                     <div class="card-body iconfont text-center">
                         <h5 class="text-white">Futuro</h5>
                         <div class="d-flex justify-content-center">

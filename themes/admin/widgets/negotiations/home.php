@@ -1,11 +1,4 @@
 <?php $v->layout("_admin"); ?>
-<?php $v->start("styles"); ?>
-<style>
-    .bg-yellow {
-        background-color: #FFFF00 !important;
-    }
-</style>
-<?php $v->end("styles"); ?>
 <!--App-Content-->
 <div class="app-content  my-3 my-md-5">
     <div class="side-app">
@@ -50,7 +43,7 @@
                                     <h5 class="text-white">Perdidos</h5>
                                 </div>
                             </div>
-                            <div class="bg-yellow">
+                            <div class="bg-dark">
                                 <div class="card-body iconfont text-center">
                                     <h5 class="text-white">Futuro</h5>
                                 </div>
@@ -150,7 +143,7 @@
                                                                             "d/m/Y") : "Não informado."; ?></p>
                                                                 </div>
                                                                 <?php elseif ($client->lastNegotiationInfo()->contact_type == "PFuturo"): ?>
-                                                                <div class="border rounded text-white bg-yellow">
+                                                                <div class="border rounded text-white bg-dark">
                                                                     <p class="m-0 text-center font-weight-bold" style="font-size: 12px">Cliente:</p>
                                                                     <p class="m-0 text-center"><?= $client->name; ?></p>
                                                                     <p class="m-0 text-center font-weight-bold" style="font-size: 12px">Vendedor:</p>
