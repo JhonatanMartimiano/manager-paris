@@ -17,19 +17,20 @@
                         <div class="col-md-6 col-sm-12">
                             <h5 class="card-title">Desempenho Vendedores:</h5>
                         </div>
-                        <!-- <div class="d-flex justify-content-end col-md-6 col-sm-12">
+                        <div class="d-flex justify-content-end col-md-6 col-sm-12">
                             <form class="form-inline mb-1" action="<?= url('/admin/reports/sellers'); ?>"
                                   method="post">
+                                  <input type="hidden" name="filter" value="goFilter">
                                 <div class="form-group">
-                                    <input type="text" name="startDate" class="mask-date">
+                                    <input type="text" name="start_date" value="<?= $start_date ?>" class="mask-date">
                                 </div>
                                 <p class="mt-0 mx-4">à</p>
                                 <div class="form-group">
-                                    <input type="text" name="endDate" class="mask-date">
+                                    <input type="text" name="end_date" value="<?= $end_date ?>" class="mask-date">
                                 </div>
                                 <button type="submit" class="btn btn-danger btn-sm ml-2 rounded">Buscar</button>
                             </form>
-                        </div> -->
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">

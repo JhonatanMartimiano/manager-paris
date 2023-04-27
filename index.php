@@ -81,7 +81,6 @@ $route->post("/negotiations/negotiation/{client_id}", "Negotiations:negotiation"
 //reports
 $route->get("/reports/sellers", "Reports:sellers");
 $route->post("/reports/sellers", "Reports:sellers");
-$route->get("/reports/sellers/{search}/{page}", "Reports:sellers");
 $route->get("/reports/seller/{seller_id}", "Reports:seller");
 $route->post("/reports/seller/{seller_id}", "Reports:seller");
 $route->get("/reports/steps", "Reports:steps");

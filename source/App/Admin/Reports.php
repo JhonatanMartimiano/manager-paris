@@ -25,29 +25,6 @@ class Reports extends Admin
 
     public function sellers(?array $data): void
     {
-        //search redirect
-        if (!empty($data["s"])) {
-            $s = str_search($data["s"]);
-            echo json_encode(["redirect" => url("/admin/reports/sellers/{$s}/1")]);
-            return;
-        }
-
-        $search = null;
-        $sellers = (new Seller())->find();
-
-        if (!empty($data["search"]) && str_search($data["search"]) != "all") {
-            $search = str_search($data["search"]);
-            $sellers = (new Seller())->find("first_name LIKE CONCAT('%', :s, '%') OR last_name LIKE CONCAT('%', :s, '%') OR email LIKE CONCAT('%', :s, '%')", "s={$search}");
-            if (!$sellers->count()) {
-                $this->message->info("Sua pesquisa não retornou resultados")->flash();
-                redirect("/admin/reports/sellers");
-            }
-        }
-
-        $all = ($search ?? "all");
-        $pager = new Pager(url("/admin/reports/sellers/{$all}/"));
-        $pager->pager($sellers->count(), 20, (!empty($data["page"]) ? $data["page"] : 1));
-
         $head = $this->seo->render(
             CONF_SITE_NAME . " | Relatórios",
             CONF_SITE_DESC,
@@ -56,8 +33,31 @@ class Reports extends Admin
             false
         );
 
+        $start_date = null;
+        $end_date = null;
+
+        $start_date = date_fmt_back($_SESSION["start_date"]);
+        $end_date = date_fmt_back($_SESSION["end_date"]);
+
+        unset($_SESSION["start_date"]);
+        unset($_SESSION["end_date"]);
+
         $negotiations = new Negotiation();
-        $post24hour = Connect::getInstance()->query("SELECT N1.id
+
+        $post24hour = null;
+        if ($start_date && $end_date) {
+            $post24hour = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact BETWEEN '$start_date' AND '$end_date'
+            AND N1.next_contact - CURDATE() < -1
+            AND N1.contact_type != 'PFinalizado'
+            AND c.status != 'Concluído'
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        } else {
+            $post24hour = Connect::getInstance()->query("SELECT N1.id
             FROM negotiations N1
             INNER JOIN clients c ON N1.client_id = c.id
             LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -66,16 +66,45 @@ class Reports extends Admin
             AND N1.contact_type != 'PFinalizado'
             AND c.status != 'Concluído'
             ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        }
 
-        $completedOrders = Connect::getInstance()->query("SELECT N1.id
+        $completedOrders = null;
+        if ($start_date && $end_date) {
+            $completedOrders = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact BETWEEN '$start_date' AND '$end_date'
+            AND N1.contact_type = 'PFinalizado'
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        } else {
+            $completedOrders = Connect::getInstance()->query("SELECT N1.id
             FROM negotiations N1
             INNER JOIN clients c ON N1.client_id = c.id
             LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
             WHERE N2.id IS NULL
             AND N1.contact_type = 'PFinalizado'
             ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        }
 
-        $waiting = Connect::getInstance()->query("SELECT N1.id
+        $waiting = null;
+        if ($start_date && $end_date) {
+            $waiting = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact - CURDATE() >= 0
+            AND N1.next_contact BETWEEN '$start_date' AND '$end_date'
+            AND (N1.contact_type = 'APagamento'
+            OR N1.contact_type = 'Orçamento'
+            OR N1.contact_type = 'Cotação')
+            AND N1.contact_type != 'PFinalizado'
+            AND N1.reason_loss = ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        } else {
+            $waiting = Connect::getInstance()->query("SELECT N1.id
             FROM negotiations N1
             INNER JOIN clients c ON N1.client_id = c.id
             LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -87,8 +116,27 @@ class Reports extends Admin
             AND N1.contact_type != 'PFinalizado'
             AND N1.reason_loss = ''
             ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        }
 
-        $inNegotiations = Connect::getInstance()->query("SELECT N1.id
+        $inNegotiations = null;
+        if ($start_date && $end_date) {
+            $inNegotiations = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact - CURDATE() >= 0
+            AND N1.next_contact BETWEEN '$start_date' AND '$end_date'
+            AND N1.contact_type != 'APagamento'
+            AND N1.contact_type != 'NRespondeu'
+            AND N1.contact_type != 'Orçamento'
+            AND N1.contact_type != 'Cotação'
+            AND N1.contact_type != 'PFinalizado'
+            AND N1.contact_type != 'PFuturo'
+            AND N1.reason_loss = ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        } else {
+            $inNegotiations = Connect::getInstance()->query("SELECT N1.id
             FROM negotiations N1
             INNER JOIN clients c ON N1.client_id = c.id
             LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -102,16 +150,47 @@ class Reports extends Admin
             AND N1.contact_type != 'PFuturo'
             AND N1.reason_loss = ''
             ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        }
 
-        $loss = Connect::getInstance()->query("SELECT N1.id
+        $loss = null;
+        if ($start_date && $end_date) {
+            $loss = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact BETWEEN '$start_date' AND '$end_date'
+            AND N1.reason_loss != ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        } else {
+            $loss = Connect::getInstance()->query("SELECT N1.id
             FROM negotiations N1
             INNER JOIN clients c ON N1.client_id = c.id
             LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
             WHERE N2.id IS NULL
             AND N1.reason_loss != ''
             ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        }
 
-        $future = Connect::getInstance()->query("SELECT N1.id
+        $future = null;
+        if ($start_date && $end_date) {
+            $future = Connect::getInstance()->query("SELECT N1.id
+            FROM negotiations N1
+            INNER JOIN clients c ON N1.client_id = c.id
+            LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+            WHERE N2.id IS NULL
+            AND N1.next_contact - CURDATE() >= 0
+            AND N1.next_contact BETWEEN '$start_date' AND '$end_date'
+            AND N1.contact_type != 'APagamento'
+            AND N1.contact_type != 'NRespondeu'
+            AND N1.contact_type != 'Orçamento'
+            AND N1.contact_type != 'Cotação'
+            AND N1.contact_type != 'PFinalizado'
+            AND N1.contact_type = 'PFuturo'
+            AND N1.reason_loss = ''
+            ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        } else {
+            $future = Connect::getInstance()->query("SELECT N1.id
             FROM negotiations N1
             INNER JOIN clients c ON N1.client_id = c.id
             LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
@@ -125,6 +204,17 @@ class Reports extends Admin
             AND N1.contact_type = 'PFuturo'
             AND N1.reason_loss = ''
             ORDER BY N1.client_id, N1.id DESC")->rowCount();
+        }
+
+        if ($data["filter"] == "goFilter") {
+            $_SESSION["start_date"] = $data["start_date"];
+            $_SESSION["end_date"] = $data["end_date"];
+            $start_date = date_fmt_back($_SESSION["start_date"]);
+            $end_date = date_fmt_back($_SESSION["end_date"]);
+            $json["redirect"] = url("/admin/reports/sellers");
+            echo json_encode($json);
+            return;
+        }
 
         $lastNegotiations = $negotiations->find()->group("client_id")->count();
 
@@ -133,9 +223,7 @@ class Reports extends Admin
         echo $this->view->render("widgets/reports/sellers", [
             "app" => "reports/sellers",
             "head" => $head,
-            "search" => $search,
-            "sellers" => $sellers->limit($pager->limit())->offset($pager->offset())->fetch(true),
-            "paginator" => $pager->render(),
+            "sellers" => (new Seller())->find()->fetch(true),
             "lastNegotiations" => ($lastNegotiations) ?? "0",
             "post24hour" => ($post24hour) ?? "0",
             "completedOrders" => $completedOrders,
@@ -144,7 +232,9 @@ class Reports extends Admin
             "loss" => ($loss) ?? "0",
             "future" => ($future) ?? "0",
             "notification" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->count(),
-            "notifications" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->fetch(true)
+            "notifications" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->fetch(true),
+            "start_date" => $start_date ? date_fmt($start_date, "d/m/Y") : null,
+            "end_date" => $end_date ? date_fmt($end_date, "d/m/Y") : null
         ]);
     }
 
