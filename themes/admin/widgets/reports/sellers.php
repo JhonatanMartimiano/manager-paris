@@ -17,7 +17,7 @@
                         <div class="col-md-6 col-sm-12">
                             <h5 class="card-title">Desempenho Vendedores:</h5>
                         </div>
-                        <div class="d-flex justify-content-end col-md-6 col-sm-12">
+                        <!-- <div class="d-flex justify-content-end col-md-6 col-sm-12">
                             <form class="form-inline mb-1" action="<?= url('/admin/reports/sellers'); ?>"
                                   method="post">
                                 <div class="form-group">
@@ -29,7 +29,7 @@
                                 </div>
                                 <button type="submit" class="btn btn-danger btn-sm ml-2 rounded">Buscar</button>
                             </form>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="card-body">

@@ -83,6 +83,7 @@ $route->get("/reports/sellers", "Reports:sellers");
 $route->post("/reports/sellers", "Reports:sellers");
 $route->get("/reports/sellers/{search}/{page}", "Reports:sellers");
 $route->get("/reports/seller/{seller_id}", "Reports:seller");
+$route->post("/reports/seller/{seller_id}", "Reports:seller");
 $route->get("/reports/steps", "Reports:steps");
 $route->post("/reports/steps", "Reports:steps");
 $route->get("/reports/steps/{search}/{page}", "Reports:steps");
