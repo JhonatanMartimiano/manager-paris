@@ -51,8 +51,8 @@ class Client extends Model
         if ($negotiations) {
             foreach ($negotiations as $negotiation) {
                 $negotiation->destroy();
-                return true;
             }
+            return true;
         }
         return false;
     }

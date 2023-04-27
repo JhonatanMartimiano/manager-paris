@@ -243,19 +243,30 @@ class Clients extends Admin
     {
         if ($data && $data["action"] == "delete") {
             $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
-            $clientDelete = (new Client())->findById($data["client_id"]);
+            $client = (new Client())->findById($data["client_id"]);
 
-            if (!$clientDelete) {
+            if (!$client) {
                 $this->message->error("Você tentou deletar os dados de um cliente que não existe")->flash();
                 echo json_encode(["redirect" => url_back()]);
                 return;
             }
+            if (!$client->deleteAllNegotiations()) {
+                $json["message"] = $client->message()->warning("Não foi possível deletar")->render();
+                echo json_encode($json);
+                return;
+            }
 
-            $clientDelete->deleteAllNegotiations();
+            $client->funnel_id = null;
+            $client->status = 'Negociação';
+            $client->reason_loss = '';
+            if (!$client->save()) {
+                $json["message"] = $client->message()->render();
+                echo json_encode($json);
+                return;
+            }
 
             $this->message->success("A negociaçãp referente esse cliente foi excluída com sucesso...")->flash();
             echo json_encode(["redirect" => url_back()]);
-
             return;
         }
     }
