@@ -217,7 +217,7 @@
 
         <button class="btn-global-modal-notification d-none" data-toggle="modal" data-target="#modalNotificationGlobal"></button>
         <!-- Modal -->
-        <div class="modal fade" id="modalNotificationGlobal" data-backdrop="static" data-notification-status="<?= (notification()) ? notification()->status : 'inactive' ?>" data-keyboard="false" tabindex="-1" aria-labelledby="modalNotificationGlobalLabel" aria-hidden="true">
+        <div class="modal fade" id="modalNotificationGlobal" data-backdrop="static" data-notification-status="<?= (notification()) ? 'active' : 'inactive' ?>" data-keyboard="false" tabindex="-1" aria-labelledby="modalNotificationGlobalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content bg-danger">
                     <div class="modal-header">
@@ -230,7 +230,7 @@
                         <div class="d-flex justify-content-center">
                             <span class="text-white fa fa-warning" style="font-size: 3em;"></span>
                         </div>
-                            <p class="text-white"><?= notification()->content ?></p>
+                            <p class="text-white">Favor verificar seu(s) cliente(s) pendentes.</p>
                         </div>
                     </div>
                 </div>

@@ -539,11 +539,18 @@ function infoFunnelID($funnel_id)
  * ###   NOTIFICATION   ###
  * ########################
  */
-/**
- * @return Notification|null
- */
- function notification(): ?Notification
+
+function notification(): bool
 {
     $sellerID = user()->seller_id;
-    return (new Notification())->find("seller_id = :sid", "sid={$sellerID}")->fetch();
+    $newClients = (new Client())->find("funnel_id IS NULL AND seller_id = :sid", "sid={$sellerID}")->order("id DESC")->limit(10)->fetch(true);
+    if ($newClients) {
+        foreach ($newClients as $newClient) {
+            if ((date_diff_panel($newClient->registration_date) < -1)) {
+               return true;
+               exit; 
+            }
+        }
+    }
+    return false;
 }

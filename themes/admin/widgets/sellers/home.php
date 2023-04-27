@@ -1,58 +1,5 @@
 <?php $v->layout("_admin"); ?>
 <?php $v->start("styles"); ?>
-<style>
-    .toggle {
-        position: relative;
-        display: inline-block;
-        width: 60px;
-        height: 34px;
-    }
-
-    .toggle input {
-        display: none;
-    }
-
-    .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #FF382B;
-        -webkit-transition: .4s;
-        transition: .4s;
-        border-radius: 34px;
-    }
-
-    .slider:before {
-        position: absolute;
-        content: "";
-        height: 26px;
-        width: 26px;
-        left: 4px;
-        bottom: 4px;
-        background-color: white;
-        -webkit-transition: .4s;
-        transition: .4s;
-        border-radius: 50%;
-    }
-
-    input:checked+.slider {
-        background-color: #039E26;
-    }
-
-    input:focus+.slider {
-        box-shadow: 0 0 1px #039E26;
-    }
-
-    input:checked+.slider:before {
-        -webkit-transform: translateX(26px);
-        -ms-transform: translateX(26px);
-        transform: translateX(26px);
-    }
-</style>
-<?php $v->end("styles"); ?>
 <!--App-Content-->
 <div class="app-content  my-3 my-md-5">
     <div class="side-app">
@@ -106,8 +53,6 @@
                                                         <a href="<?= url('/admin/sellers/seller/' . $seller->id); ?>" class="btn btn-info btn-sm" title="Editar"><i class="fa fa-pencil"></i></a>
 
                                                         <a href="#" class="btn btn-danger btn-sm" data-post="<?= url("/admin/sellers/seller/{$seller->id}"); ?>" data-action="delete" data-confirm="ATENÇÃO: Tem certeza que deseja excluir o vendedor e todos os dados relacionados a ele? Essa ação não pode ser feita!" data-seller_id="<?= $seller->id; ?>" title="Excluir"><i class="fa fa-trash"></i></a>
-
-                                                        <a href="#" class="btn-modal-notification btn btn-light btn-sm" title="Notificar" data-toggle="modal" data-target="#modalNotification" data-seller_id="<?= $seller->id; ?>"><i class="fa fa-bell"></i></a>
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>
@@ -150,6 +95,3 @@
     </div>
 </div>
 <!--/App-Content-->
-<?php $v->start("scripts"); ?>
-<script src="<?= theme("/assets/js/custom/seller-notification.js", CONF_VIEW_ADMIN); ?>"></script>
-<?php $v->end("scripts"); ?>

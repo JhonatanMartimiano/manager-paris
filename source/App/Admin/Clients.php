@@ -247,14 +247,14 @@ class Clients extends Admin
 
             if (!$clientDelete) {
                 $this->message->error("Você tentou deletar os dados de um cliente que não existe")->flash();
-                echo json_encode(["redirect" => url("/admin/clients/home")]);
+                echo json_encode(["redirect" => url_back()]);
                 return;
             }
 
             $clientDelete->deleteAllNegotiations();
 
             $this->message->success("A negociaçãp referente esse cliente foi excluída com sucesso...")->flash();
-            echo json_encode(["redirect" => url("/admin/dash/home")]);
+            echo json_encode(["redirect" => url_back()]);
 
             return;
         }
