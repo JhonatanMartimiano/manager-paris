@@ -83,7 +83,7 @@ class Negotiations extends Admin
             }
 
             $this->message->success("Negociação salva com sucesso...")->flash();
-            $json["redirect"] = url("/admin/negotiations/home");
+            $json["redirect"] = url("/admin/negotiations/negotiation/{$negotiationCreate->client_id}");
 
             echo json_encode($json);
             return;
