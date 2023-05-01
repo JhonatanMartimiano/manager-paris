@@ -40,6 +40,7 @@ $route->get("/dash/loss", "Dash:loss");
 $route->post("/dash/loss", "Dash:loss");
 $route->get("/dash/future", "Dash:future");
 $route->post("/dash/future", "Dash:future");
+$route->post("/dash/contact-type/ajax", "Dash:contactTypeAjax");
 //users
 $route->get("/users/home", "Users:home");
 $route->post("/users/home", "Users:home");

@@ -37,11 +37,17 @@ class Dash extends Admin
         $seller_id = user()->seller_id;
         $negotiations = new Negotiation();
 
+        $monthNow = date("m");
+        $yearNow = date("Y");
+        $start_date = "{$yearNow}-{$monthNow}-01";
+        $end_date = date("Y-m-d");
+
         $post24hour = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
         AND c.status != 'Concluído'
@@ -50,6 +56,7 @@ class Dash extends Admin
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
@@ -61,6 +68,7 @@ class Dash extends Admin
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
             Connect::getInstance()->query("SELECT N1.id
@@ -68,6 +76,7 @@ class Dash extends Admin
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -77,6 +86,7 @@ class Dash extends Admin
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND (N1.contact_type = 'APagamento'
         OR N1.contact_type = 'Orçamento'
@@ -88,6 +98,7 @@ class Dash extends Admin
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND (N1.contact_type = 'APagamento'
@@ -102,6 +113,7 @@ class Dash extends Admin
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -115,6 +127,7 @@ class Dash extends Admin
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -131,12 +144,14 @@ class Dash extends Admin
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -146,6 +161,7 @@ class Dash extends Admin
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -159,6 +175,7 @@ class Dash extends Admin
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -216,26 +233,26 @@ class Dash extends Admin
     MAX(CASE WHEN N.funnel_id = 3 THEN N.updated_at END) AS data3,
     MAX(CASE WHEN N.funnel_id = 3 THEN N.next_contact END) AS data33,
     MAX(CASE WHEN N.client_id = C.id THEN N.description END) AS obs
-FROM clients AS C 
-    INNER JOIN negotiations AS N ON N.client_id = C.id 
-    INNER JOIN sellers AS V ON N.seller_id = V.id 
-WHERE 
-    N.id IN (
-    SELECT 
-        MAX(N2.id) 
-    FROM negotiations AS N2 
-    GROUP BY N2.client_id, N2.funnel_id
-    )
-    AND N.seller_id = {$seller_id}
-GROUP BY 
-    C.id, 
-    V.id 
-ORDER BY 
-    id_neg DESC,
-    C.name, 
-    V.first_name
-LIMIT 20
-")->fetchAll();
+    FROM clients AS C 
+        INNER JOIN negotiations AS N ON N.client_id = C.id 
+        INNER JOIN sellers AS V ON N.seller_id = V.id 
+    WHERE 
+        N.id IN (
+        SELECT 
+            MAX(N2.id) 
+        FROM negotiations AS N2 
+        GROUP BY N2.client_id, N2.funnel_id
+        )
+        AND N.seller_id = {$seller_id}
+    GROUP BY 
+        C.id, 
+        V.id 
+    ORDER BY 
+        id_neg DESC,
+        C.name, 
+        V.first_name
+    LIMIT 20
+    ")->fetchAll();
 
         $head = $this->seo->render(
             CONF_SITE_NAME . " | Dashboard",
@@ -277,12 +294,17 @@ LIMIT 20
     function late(?array $data)
     {
         $seller_id = \user()->seller_id;
+        $monthNow = date("m");
+        $yearNow = date("Y");
+        $start_date = "{$yearNow}-{$monthNow}-01";
+        $end_date = date("Y-m-d");
         $negotiations = new Negotiation();
         $post24hour = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
         AND c.status != 'Concluído'
@@ -291,6 +313,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
@@ -302,6 +325,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
             Connect::getInstance()->query("SELECT N1.id
@@ -309,6 +333,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -318,6 +343,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND (N1.contact_type = 'APagamento'
         OR N1.contact_type = 'Orçamento'
@@ -329,6 +355,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND (N1.contact_type = 'APagamento'
@@ -343,6 +370,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -356,6 +384,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -372,12 +401,14 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -387,6 +418,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -400,6 +432,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -466,12 +499,17 @@ LIMIT 20
     function completed(?array $data)
     {
         $seller_id = \user()->seller_id;
+        $monthNow = date("m");
+        $yearNow = date("Y");
+        $start_date = "{$yearNow}-{$monthNow}-01";
+        $end_date = date("Y-m-d");
         $negotiations = new Negotiation();
         $post24hour = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
         AND c.status != 'Concluído'
@@ -480,6 +518,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
@@ -491,6 +530,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
             Connect::getInstance()->query("SELECT N1.id
@@ -498,6 +538,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -507,6 +548,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND (N1.contact_type = 'APagamento'
         OR N1.contact_type = 'Orçamento'
@@ -518,6 +560,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND (N1.contact_type = 'APagamento'
@@ -532,6 +575,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -545,6 +589,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -561,12 +606,14 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -576,6 +623,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -589,6 +637,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -646,12 +695,17 @@ LIMIT 20
     function waiting(?array $data)
     {
         $seller_id = \user()->seller_id;
+        $monthNow = date("m");
+        $yearNow = date("Y");
+        $start_date = "{$yearNow}-{$monthNow}-01";
+        $end_date = date("Y-m-d");
         $negotiations = new Negotiation();
         $post24hour = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
         AND c.status != 'Concluído'
@@ -660,6 +714,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
@@ -671,6 +726,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
             Connect::getInstance()->query("SELECT N1.id
@@ -678,6 +734,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -687,6 +744,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND (N1.contact_type = 'APagamento'
         OR N1.contact_type = 'Orçamento'
@@ -698,6 +756,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND (N1.contact_type = 'APagamento'
@@ -712,6 +771,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -725,6 +785,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -741,12 +802,14 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -756,6 +819,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -769,6 +833,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -834,12 +899,17 @@ LIMIT 20
     function inNegotiations(?array $data)
     {
         $seller_id = \user()->seller_id;
+        $monthNow = date("m");
+        $yearNow = date("Y");
+        $start_date = "{$yearNow}-{$monthNow}-01";
+        $end_date = date("Y-m-d");
         $negotiations = new Negotiation();
         $post24hour = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
         AND c.status != 'Concluído'
@@ -848,6 +918,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
@@ -859,6 +930,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
             Connect::getInstance()->query("SELECT N1.id
@@ -866,6 +938,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -875,6 +948,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND (N1.contact_type = 'APagamento'
         OR N1.contact_type = 'Orçamento'
@@ -886,6 +960,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND (N1.contact_type = 'APagamento'
@@ -900,6 +975,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -913,6 +989,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -929,12 +1006,14 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -944,6 +1023,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -957,6 +1037,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -1026,12 +1107,17 @@ LIMIT 20
     function loss(?array $data)
     {
         $seller_id = \user()->seller_id;
+        $monthNow = date("m");
+        $yearNow = date("Y");
+        $start_date = "{$yearNow}-{$monthNow}-01";
+        $end_date = date("Y-m-d");
         $negotiations = new Negotiation();
         $post24hour = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
         AND c.status != 'Concluído'
@@ -1040,6 +1126,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
@@ -1051,6 +1138,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
             Connect::getInstance()->query("SELECT N1.id
@@ -1058,6 +1146,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -1067,6 +1156,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND (N1.contact_type = 'APagamento'
         OR N1.contact_type = 'Orçamento'
@@ -1078,6 +1168,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND (N1.contact_type = 'APagamento'
@@ -1092,6 +1183,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -1105,6 +1197,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -1121,12 +1214,14 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -1136,6 +1231,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -1149,6 +1245,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -1207,12 +1304,17 @@ LIMIT 20
     function future(?array $data)
     {
         $seller_id = \user()->seller_id;
+        $monthNow = date("m");
+        $yearNow = date("Y");
+        $start_date = "{$yearNow}-{$monthNow}-01";
+        $end_date = date("Y-m-d");
         $negotiations = new Negotiation();
         $post24hour = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
         AND c.status != 'Concluído'
@@ -1221,6 +1323,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.next_contact - CURDATE() < -1
         AND N1.contact_type != 'PFinalizado'
@@ -1232,6 +1335,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount() :
             Connect::getInstance()->query("SELECT N1.id
@@ -1239,6 +1343,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type = 'PFinalizado'
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -1248,6 +1353,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND (N1.contact_type = 'APagamento'
         OR N1.contact_type = 'Orçamento'
@@ -1259,6 +1365,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND (N1.contact_type = 'APagamento'
@@ -1273,6 +1380,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -1286,6 +1394,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -1302,12 +1411,14 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
         FROM negotiations N1
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.seller_id = {$seller_id}
         AND N1.reason_loss != ''
         ORDER BY N1.client_id, N1.id DESC")->rowCount();
@@ -1317,6 +1428,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.contact_type != 'APagamento'
         AND N1.contact_type != 'NRespondeu'
@@ -1330,6 +1442,7 @@ LIMIT 20
         INNER JOIN clients c ON N1.client_id = c.id
         LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
         WHERE N2.id IS NULL
+        AND N1.created_at BETWEEN '$start_date' AND '$end_date'
         AND N1.next_contact - CURDATE() >= 0
         AND N1.seller_id = {$seller_id}
         AND N1.contact_type != 'APagamento'
@@ -1397,5 +1510,163 @@ LIMIT 20
             "futureArr" => (!empty($data)) ? $inNegotiationF : $inNegotiations30,
             "date" => $data
         ]);
+    }
+
+    public function contactTypeAjax()
+    {
+        $data = json_decode(file_get_contents("php://input"), true);
+        if ($data) {
+            $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
+            $seller_id = user()->seller_id;
+            switch ($data["contact_type"]) {
+                case 'late':
+                    $result = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.next_contact - CURDATE() < -1
+                    AND N1.contact_type != 'PFinalizado'
+                    AND c.status != 'Concluído'
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.seller_id = {$seller_id}
+                    AND N1.next_contact - CURDATE() < -1
+                    AND N1.contact_type != 'PFinalizado'
+                    AND c.status != 'Concluído'
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount();
+                    break;
+
+                case "completed":
+                    $result = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.contact_type = 'PFinalizado'
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount() :
+                        Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.seller_id = {$seller_id}
+                    AND N1.contact_type = 'PFinalizado'
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount();
+                    break;
+                
+                case "waiting":
+                    $result = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.next_contact - CURDATE() >= 0
+                    AND (N1.contact_type = 'APagamento'
+                    OR N1.contact_type = 'Orçamento'
+                    OR N1.contact_type = 'Cotação')
+                    AND N1.contact_type != 'PFinalizado'
+                    AND N1.reason_loss = ''
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.next_contact - CURDATE() >= 0
+                    AND N1.seller_id = {$seller_id}
+                    AND (N1.contact_type = 'APagamento'
+                    OR N1.contact_type = 'Orçamento'
+                    OR N1.contact_type = 'Cotação')
+                    AND N1.contact_type != 'PFinalizado'
+                    AND N1.reason_loss = ''
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount();
+                    break;
+
+                case "inNegotiation":
+                    $result = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.next_contact - CURDATE() >= 0
+                    AND N1.contact_type != 'APagamento'
+                    AND N1.contact_type != 'NRespondeu'
+                    AND N1.contact_type != 'Orçamento'
+                    AND N1.contact_type != 'Cotação'
+                    AND N1.contact_type != 'PFinalizado'
+                    AND N1.contact_type != 'PFuturo'
+                    AND N1.reason_loss = ''
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.next_contact - CURDATE() >= 0
+                    AND N1.seller_id = {$seller_id}
+                    AND N1.contact_type != 'APagamento'
+                    AND N1.contact_type != 'NRespondeu'
+                    AND N1.contact_type != 'Orçamento'
+                    AND N1.contact_type != 'Cotação'
+                    AND N1.contact_type != 'PFinalizado'
+                    AND N1.contact_type != 'PFuturo'
+                    AND N1.reason_loss = ''
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount();
+                    break;
+
+                case "loss":
+                    $result = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.reason_loss != ''
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.seller_id = {$seller_id}
+                    AND N1.reason_loss != ''
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount();
+                    break;
+
+                case "future":
+                    $result = (user()->level >= 3) ? Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.next_contact - CURDATE() >= 0
+                    AND N1.contact_type != 'APagamento'
+                    AND N1.contact_type != 'NRespondeu'
+                    AND N1.contact_type != 'Orçamento'
+                    AND N1.contact_type != 'Cotação'
+                    AND N1.contact_type != 'PFinalizado'
+                    AND N1.contact_type = 'PFuturo'
+                    AND N1.reason_loss = ''
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount() : Connect::getInstance()->query("SELECT N1.id
+                    FROM negotiations N1
+                    INNER JOIN clients c ON N1.client_id = c.id
+                    LEFT JOIN negotiations N2 ON N2.client_id = N1.client_id AND N2.id > N1.id
+                    WHERE N2.id IS NULL
+                    AND N1.next_contact - CURDATE() >= 0
+                    AND N1.seller_id = {$seller_id}
+                    AND N1.contact_type != 'APagamento'
+                    AND N1.contact_type != 'NRespondeu'
+                    AND N1.contact_type != 'Orçamento'
+                    AND N1.contact_type != 'Cotação'
+                    AND N1.contact_type != 'PFinalizado'
+                    AND N1.contact_type = 'PFuturo'
+                    AND N1.reason_loss = ''
+                    ORDER BY N1.client_id, N1.id DESC")->rowCount();
+                    break;
+
+            }
+            $json["result"] = $result;
+            echo json_encode($json);
+        }
     }
 }
