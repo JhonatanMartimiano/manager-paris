@@ -42,7 +42,7 @@ class Clients extends Admin
 
         if (!empty($data["search"]) && str_search($data["search"]) != "all") {
             $search = str_search($data["search"]);
-            $clients = (new Client())->find("name LIKE CONCAT('%', :s, '%')", "s={$search}");
+            $clients = (new Client())->find("name LIKE CONCAT('%', :s, '%') OR phone LIKE CONCAT('%', :s, '%') OR phone_int LIKE CONCAT('%', :s, '%')", "s={$search}");
             if (!$clients->count()) {
                 $this->message->info("Sua pesquisa não retornou resultados")->flash();
                 redirect("/admin/clients/home");
