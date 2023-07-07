@@ -38,16 +38,27 @@
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label>Cidade</label>
                                         <select name="city" class="form-control selectCity"></select>
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label>Telefone</label>
                                         <input type="text" class="form-control mask-phone" name="phone"
                                                placeholder="Digite seu telefone">
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
+                                        <label>Países</label>
+                                        <select name="country_id" class="form-control">
+                                            <option selected disabled value="">Selecionar</option>
+                                            <?php if ($countries): ?>
+                                                <?php foreach ($countries as $countrie): ?>
+                                                    <option value="<?= $countrie->id; ?>"><?= $countrie->name; ?></option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
                                         <label>Telefone Internacional</label>
                                         <input type="text" class="form-control mask-phone-int" name="phone_int"
                                                placeholder="Digite seu telefone">
@@ -133,19 +144,37 @@
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label>Cidade</label>
                                         <select name="city" class="form-control selectCity">
                                             <option value="<?= $client->city; ?>"><?= $client->cityName(); ?></option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label>Telefone</label>
                                         <input type="text" class="form-control mask-phone" name="phone"
                                                value="<?= $client->phone; ?>"
                                                placeholder="Digite seu telefone">
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
+                                        <label>Países</label>
+                                        <select name="country_id" class="form-control">
+                                            <option selected disabled value="">Selecionar</option>
+                                            <?php if ($countries): ?>
+                                                <?php
+                                                    $countryId = $client->country_id;
+                                                    $selected = function ($value) use ($countryId)
+                                                    {
+                                                        return ($countryId == $value) ? "selected" : "";
+                                                    }
+                                                ?>
+                                                <?php foreach ($countries as $countrie): ?>
+                                                    <option <?= $selected($countrie->id) ?> value="<?= $countrie->id; ?>"><?= $countrie->name; ?></option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
                                         <label>Telefone Internacional</label>
                                         <input type="text" class="form-control mask-phone-int" name="phone_int" value="<?= $client->phone_int; ?>"
                                                placeholder="Digite seu telefone">

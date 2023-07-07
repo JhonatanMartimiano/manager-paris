@@ -3,6 +3,7 @@
 namespace Source\App\Admin;
 
 use Source\Models\AppCity;
+use Source\Models\AppCountries;
 use Source\Models\AppState;
 use Source\Models\Client;
 use Source\Models\Funnel;
@@ -89,6 +90,7 @@ class Clients extends Admin
             $clientCreate->city = $data["city"];
             $clientCreate->state = $data["state"];
             $clientCreate->phone = $data["phone"] ? preg_replace("/[^0-9]/", "", $data["phone"]) : null;
+            $clientCreate->country_id = $data["country_id"];
             $clientCreate->phone_int = $data["phone_int"] ? preg_replace("/[^0-9]/", "", $data["phone_int"]) : null;
             $clientCreate->seller_id = $data["seller_id"];
             $clientCreate->registration_date = date_fmt_back($data["registration_date"]);
@@ -148,6 +150,7 @@ class Clients extends Admin
             $clientUpdate->city = $data["city"];
             $clientUpdate->state = $data["state"];
             $clientUpdate->phone = $data["phone"] ? preg_replace("/[^0-9]/", "", $data["phone"]) : null;
+            $clientUpdate->country_id = $data["country_id"];
             $clientUpdate->phone_int = $data["phone_int"] ? preg_replace("/[^0-9]/", "", $data["phone_int"]) : null;
             $clientUpdate->seller_id = $data["seller_id"];
             $clientUpdate->funnel_id = $data["funnel_id"];
@@ -222,7 +225,8 @@ class Clients extends Admin
             "sellerSelected" => $clientEdit->seller_id,
             "funnelSelected" => $clientEdit->funnel_id,
             "notification" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->count(),
-            "notifications" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->fetch(true)
+            "notifications" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->fetch(true),
+            "countries" => (new AppCountries())->find()->fetch(true)
         ]);
     }
 
