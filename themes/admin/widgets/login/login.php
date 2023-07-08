@@ -21,12 +21,10 @@
                     <span class="custom-control-label text-dark">Lembre de mim</span>
                 </label>
             </div>
+            <div class="g-recaptcha" data-sitekey="6LeuPwgnAAAAAIZoOQvdh0Yu9UEsx23p5s_UwwO1"></div>
             <div class="form-footer mt-2">
                 <button type="submit" class="btn btn-primary btn-block">Entrar</button>
             </div>
-            <!-- <div class="text-center  mt-3 text-dark">
-                Ainda não tem conta? <a href="<?= url('/admin/register'); ?>">Inscrever-se</a>
-            </div> -->
         </div>
     </div>
 </form>

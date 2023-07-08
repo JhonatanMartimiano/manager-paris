@@ -40,6 +40,7 @@
     <link rel="stylesheet" type="text/css" href="<?= url('/shared/styles/styles.css'); ?>" />
     <link rel="stylesheet" type="text/css" href="<?= url('/shared/styles/login.css'); ?>" />
 
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body class="construction-image">
 
@@ -102,6 +103,13 @@
 <script src="<?= theme('/assets/js/admin-custom.js', CONF_VIEW_ADMIN); ?>"></script>
 
 <script src="<?= theme('/assets/js/login.js', CONF_VIEW_ADMIN); ?>"></script>
-
+<script type="text/javascript">
+  var onloadCallback = function() {
+    console.log("grecaptcha is ready!");
+  };
+</script>
+<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit"
+    async defer>
+</script>
 </body>
 </html>

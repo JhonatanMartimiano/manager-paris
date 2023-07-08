@@ -45,25 +45,42 @@ class Login extends Controller
             redirect("/admin/dash");
         }
 
-        if (!empty($data["email"]) && !empty($data["password"])) {
-            if (request_limit("loginLogin", 50, 5 * 60)) {
-                $json["message"] = $this->message->error("ACESSO NEGADO: Aguarde por 5 minutos para tentar novamente.")->render();
+        if (isset($data["g-recaptcha-response"])) {
+            $gReCaptchaResponse = $data["g-recaptcha-response"];
+            $secretKey = "6LeuPwgnAAAAAP5RJJqy4SlKfaThODwKvtnOcnPR";
+            $ip = $_SERVER["REMOTE_ADDR"];
+            $url = "https://www.google.com/recaptcha/api/siteverify?secret={$secretKey}&response={$gReCaptchaResponse}&remoteip={$ip}";
+            $fire = file_get_contents($url);
+            $jsonReCaptcha = json_decode($fire);
+
+            if (!$gReCaptchaResponse) {
+                $json["message"] = $this->message->warning("Preencha o reCaptcha...")->render();
                 echo json_encode($json);
                 return;
             }
 
-            $save = (!empty($data["save"]) ? true : false);
-            $auth = new Auth();
-            $login = $auth->login($data["email"], $data["password"], true, 2);
-
-            if ($login) {
-                $json["redirect"] = url("/admin/dash");
-            } else {
-                $json["message"] = $auth->message()->render();
+            if ($jsonReCaptcha->success) {
+                if (!empty($data["email"]) && !empty($data["password"])) {
+                    if (request_limit("loginLogin", 50, 5 * 60)) {
+                        $json["message"] = $this->message->error("ACESSO NEGADO: Aguarde por 5 minutos para tentar novamente.")->render();
+                        echo json_encode($json);
+                        return;
+                    }
+        
+                    $save = (!empty($data["save"]) ? true : false);
+                    $auth = new Auth();
+                    $login = $auth->login($data["email"], $data["password"], $save, 2);
+        
+                    if ($login) {
+                        $json["redirect"] = url("/admin/dash");
+                    } else {
+                        $json["message"] = $auth->message()->render();
+                    }
+        
+                    echo json_encode($json);
+                    return;
+                }
             }
-
-            echo json_encode($json);
-            return;
         }
 
         $head = $this->seo->render(
@@ -177,7 +194,7 @@ class Login extends Controller
         }
 
         $head = $this->seo->render(
-            "Recuperar Senha - " . CONF_SITE_DASH,
+            "Recuperar Senha - " . CONF_SITE_NAME,
             CONF_SITE_DESC,
             url("/recuperar"),
             theme("/assets/images/share.jpg", CONF_VIEW_ADMIN)
@@ -226,7 +243,7 @@ class Login extends Controller
         }
 
         $head = $this->seo->render(
-            "Crie sua nova senha no " . CONF_SITE_DASH,
+            "Crie sua nova senha no " . CONF_SITE_NAME,
             CONF_SITE_DESC,
             url("/recuperar"),
             theme("/assets/images/share.jpg", CONF_VIEW_ADMIN)
