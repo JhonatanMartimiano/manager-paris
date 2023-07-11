@@ -275,7 +275,7 @@ class Dash extends Admin
             "future" => ($future) ?? 0,
             "allNegotiations" => $query,
             "negotiation" => (new Negotiation()),
-            "newClients" => (user()->level >= 3) ? (new Client())->find("funnel_id IS NULL")->order("id DESC")->limit(10)->fetch(true) : (new Client())->find("funnel_id IS NULL AND seller_id = :sid", "sid={$seller_id}")->order("id DESC")->limit(10)->fetch(true),
+            "newClients" => (user()->level >= 3) ? (new Client())->find("funnel_id IS NULL  AND YEAR(registration_date) >= 2023")->order("id DESC")->limit(10)->fetch(true) : (new Client())->find("funnel_id IS NULL AND YEAR(registration_date) >= 2023 AND seller_id = :sid", "sid={$seller_id}")->order("id DESC")->limit(10)->fetch(true),
             "notification" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->count(),
             "notifications" => (new Message())->find("sender != {$userID} AND recipient = {$userID} AND status = 'closed'")->fetch(true)
         ]);

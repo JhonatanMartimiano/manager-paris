@@ -90,7 +90,7 @@ class Clients extends Admin
             $clientCreate->city = $data["city"];
             $clientCreate->state = $data["state"];
             $clientCreate->phone = $data["phone"] ? preg_replace("/[^0-9]/", "", $data["phone"]) : null;
-            $clientCreate->country_id = $data["country_id"];
+            $clientCreate->country_id = $data["country_id"] ? $data["country_id"] : null;
             $clientCreate->phone_int = $data["phone_int"] ? preg_replace("/[^0-9]/", "", $data["phone_int"]) : null;
             $clientCreate->seller_id = $data["seller_id"];
             $clientCreate->registration_date = date_fmt_back($data["registration_date"]);
