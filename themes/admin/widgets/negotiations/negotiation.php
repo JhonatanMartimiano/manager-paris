@@ -45,8 +45,13 @@
                                 <div class="form-group col-md-3">
                                     <div class="form-group">
                                         <label>Telefone</label>
-                                        <input type="text" class="form-control mask-phone" name="phone"
+                                        <?php if ($client->phone): ?>
+                                            <input type="text" class="form-control mask-phone" name="phone"
                                                value="<?= $client->phone; ?>" readonly>
+                                        <?php else: ?>
+                                            <input type="text" class="form-control mask-phone-int" name="phone"
+                                               value="<?= $client->phone_int; ?>" readonly>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 <div class="form-group col-md-6">
