@@ -201,6 +201,11 @@
                                     </div>
                                 </div>
                                 <div class="form-group col-md-12">
+                                    <label>Observação do Cliente</label>
+                                    <textarea rows="2"
+                                              class="form-control" readonly><?= $client->observation; ?></textarea>
+                                </div>
+                                <div class="form-group col-md-12">
                                     <label>Observação</label>
                                     <textarea name="description" rows="2"
                                               class="form-control" placeholder="Digite sua descrição"></textarea>
