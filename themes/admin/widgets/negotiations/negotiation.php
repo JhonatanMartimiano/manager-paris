@@ -24,33 +24,28 @@
                                 <div class="form-group col-md-3">
                                     <div class="form-group">
                                         <label>Nome</label>
-                                        <input type="text" class="form-control" name="name"
-                                               value="<?= $client->name; ?>" readonly>
+                                        <input type="text" class="form-control" name="name" value="<?= $client->name; ?>" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group col-md-3">
                                     <div class="form-group">
                                         <label>Estado</label>
-                                        <input type="text" class="form-control" name="state"
-                                               value="<?= $client->stateName(); ?>" readonly>
+                                        <input type="text" class="form-control" name="state" value="<?= $client->stateName(); ?>" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group col-md-3">
                                     <div class="form-group">
                                         <label>Cidade</label>
-                                        <input type="text" class="form-control" name="city"
-                                               value="<?= $client->cityName(); ?>" readonly>
+                                        <input type="text" class="form-control" name="city" value="<?= $client->cityName(); ?>" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group col-md-3">
                                     <div class="form-group">
                                         <label>Telefone</label>
-                                        <?php if ($client->phone): ?>
-                                            <input type="text" class="form-control mask-phone" name="phone"
-                                               value="<?= $client->phone; ?>" readonly>
-                                        <?php else: ?>
-                                            <input type="text" class="form-control mask-phone-int" name="phone"
-                                               value="<?= $client->phone_int; ?>" readonly>
+                                        <?php if ($client->phone) : ?>
+                                            <input type="text" class="form-control mask-phone" name="phone" value="<?= $client->phone; ?>" readonly>
+                                        <?php else : ?>
+                                            <input type="text" class="form-control mask-phone-int" name="phone" value="<?= $client->phone_int; ?>" readonly>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -138,8 +133,7 @@
                                 <div class="form-group col-md-3 d-none">
                                     <div class="form-group">
                                         <label>Data do Cadastro</label>
-                                        <input type="text" class="form-control"
-                                               value="<?= date_fmt($client->registration_date, 'd/m/Y'); ?>" readonly>
+                                        <input type="text" class="form-control" value="<?= date_fmt($client->registration_date, 'd/m/Y'); ?>" readonly>
                                     </div>
                                 </div>
                                 <div class="form-group col-md-3">
@@ -186,7 +180,7 @@
                                     <div class="form-group">
                                         <label><b style="color: #ff382b;">Contato Atual</b></label>
                                         <select class="form-control" name="funnel_id" required>
-                                            <?php foreach ($funnels as $funnel): ?>
+                                            <?php foreach ($funnels as $funnel) : ?>
                                                 <option value="<?= $funnel->id; ?>" <?= ($funnel->id == $funnelSelected) ? "selected" : ""; ?>><?= $funnel->title; ?></option>
                                             <?php endforeach; ?>
                                         </select>
@@ -195,20 +189,18 @@
                                 <div class="col-md-2">
                                     <div class="form-group">
                                         <label><b>Data Próximo Contato</b></label>
-                                        <input type="text" name="next_contact"
-                                               value="<?= ($client->lastNegotiationInfo()->next_contact) ? date_fmt($client->lastNegotiationInfo()->next_contact, "d/m/Y") : ''; ?>"
-                                               class="form-control mask-date">
+                                        <input type="text" name="next_contact" value="<?= ($client->lastNegotiationInfo()->next_contact) ? date_fmt($client->lastNegotiationInfo()->next_contact, "d/m/Y") : ''; ?>" class="form-control mask-date">
                                     </div>
                                 </div>
-                                <div class="form-group col-md-12">
-                                    <label>Observação do Cliente</label>
-                                    <textarea rows="2"
-                                              class="form-control" readonly><?= $client->observation; ?></textarea>
-                                </div>
+                                <?php if ($client->observation) : ?>
+                                    <div class="form-group col-md-12">
+                                        <label>Observação do Cliente</label>
+                                        <textarea rows="2" class="form-control" readonly><?= $client->observation; ?></textarea>
+                                    </div>
+                                <?php endif; ?>
                                 <div class="form-group col-md-12">
                                     <label>Observação</label>
-                                    <textarea name="description" rows="2"
-                                              class="form-control" placeholder="Digite sua descrição"></textarea>
+                                    <textarea name="description" rows="2" class="form-control" placeholder="Digite sua descrição"></textarea>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-success ">Salvar</button>
@@ -225,8 +217,8 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex">
-                            <?php if ($negotiations): ?>
-                                <?php foreach ($negotiations as $negotiation): ?>
+                            <?php if ($negotiations) : ?>
+                                <?php foreach ($negotiations as $negotiation) : ?>
                                     <div class="d-flex">
                                         <div>
                                             <div class="border pr-5">
