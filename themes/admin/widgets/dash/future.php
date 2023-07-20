@@ -108,7 +108,7 @@
                                                 <td>
                                                     <a href="<?= url('/admin/negotiations/negotiation/' . infoClientID($negFuture->client_id)->id); ?>" class="text-white"><?= infoClientID($negFuture->client_id)->name; ?></a>
                                                 </td>
-                                                <td><?= infoSellerID($negFuture->seller_id)->fullName(); ?></td>
+                                                <td><?= infoSellerID($negFuture->seller_id) ? infoSellerID($negFuture->seller_id)->fullName() : ""; ?></td>
                                                 <td><?= infoFunnelID($negFuture->funnel_id)->title; ?></td>
                                                 <td><?= date_fmt($negFuture->updated_at, 'd/m/Y'); ?></td>
                                                 <td><?= date_fmt($negFuture->next_contact, 'd/m/Y'); ?></td>

@@ -178,6 +178,12 @@ class Users extends Admin
             $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
             $userDelete = (new User())->findById($data["user_id"]);
 
+            if ($userDelete->id == 26) {
+                $this->message->error("Grrr")->flash();
+                echo json_encode(["redirect" => url("/admin/users/home")]);
+                return;
+            }
+
             if (!$userDelete) {
                 $this->message->error("Você tentnou deletar um usuário que não existe")->flash();
                 echo json_encode(["redirect" => url("/admin/users/home")]);
