@@ -20,6 +20,11 @@
     <!-- Bootstrap Css -->
     <link href="<?= theme('/assets/plugins/bootstrap-4.3.1/css/bootstrap.min.css', CONF_VIEW_ADMIN); ?>" rel="stylesheet" />
 
+    <!-- DataTables -->
+    <link rel="stylesheet" href="<?= theme('assets/dataTables/dataTables.bootstrap4.min.css', CONF_VIEW_ADMIN); ?>">
+    <link rel="stylesheet" href="<?= theme('assets/dataTables/responsive.bootstrap4.min.css', CONF_VIEW_ADMIN); ?>">
+    <link rel="stylesheet" href="<?= theme('assets/dataTables/buttons.bootstrap4.min.css', CONF_VIEW_ADMIN); ?>">
+
     <!-- Dashboard Css -->
     <link href="<?= theme('/assets/css/style.css', CONF_VIEW_ADMIN); ?>" rel="stylesheet" />
     <link href="<?= theme('/assets/css/admin-custom.css', CONF_VIEW_ADMIN); ?>" rel="stylesheet" />
@@ -249,6 +254,20 @@
     <!-- Bootstrap js -->
     <script src="<?= theme('/assets/plugins/bootstrap-4.3.1/js/popper.min.js', CONF_VIEW_ADMIN); ?>"></script>
     <script src="<?= theme('/assets/plugins/bootstrap-4.3.1/js/bootstrap.min.js', CONF_VIEW_ADMIN); ?>"></script>
+
+    <!-- DataTables  & Plugins -->
+    <script src="<?= theme('assets/dataTables/jquery.dataTables.min.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/dataTables.bootstrap4.min.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/dataTables.responsive.min.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/responsive.bootstrap4.min.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/dataTables.buttons.min.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/buttons.bootstrap4.min.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/jszip/jszip.min.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/pdfmake.min.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/vfs_fonts.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/buttons.html5.min.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/buttons.print.min.js', CONF_VIEW_ADMIN); ?>"></script>
+    <script src="<?= theme('assets/dataTables/buttons.colVis.min.js', CONF_VIEW_ADMIN); ?>"></script>
 
     <!--JQueryVehiclerkline Js-->
     <script src="<?= theme('/assets/js/jquery.sparkline.min.js', CONF_VIEW_ADMIN); ?>"></script>
