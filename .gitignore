@@ -1,2 +1,8 @@
-/storage
+.docker
+.vscode
+storage
+vendor
+.htaccess
 *.sql
+*.lock
+docker-compose.yml

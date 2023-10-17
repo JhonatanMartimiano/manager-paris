@@ -191,6 +191,11 @@
                             </ul>
                         </li>
                     <?php endif; ?>
+                    <?php if (user()->level == 2) : ?>
+                        <li>
+                            <a class="side-menu__item" href="<?= url('/admin/clients/home'); ?>"><i class="side-menu__icon fa fa-users"></i><span class="side-menu__label">Clientes</span></a>
+                        </li>
+                    <?php endif ?>
                     <li class="slide">
                         <a class="side-menu__item" data-toggle="slide" href="#"><i class="side-menu__icon fa fa-envelope"></i><span class="side-menu__label">Mensagens</span><i class="angle fa fa-angle-right"></i></a>
                         <ul class="slide-menu">
@@ -235,12 +240,12 @@
                         <div class="d-flex justify-content-center">
                             <span class="text-white fa fa-warning" style="font-size: 3em;"></span>
                         </div>
-                            <p class="text-white">Favor verificar seu(s) cliente(s) pendentes.</p>
-                        </div>
+                        <p class="text-white">Favor verificar seu(s) cliente(s) pendentes.</p>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
     <!--/Page-->
 

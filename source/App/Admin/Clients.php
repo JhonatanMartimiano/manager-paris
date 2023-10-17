@@ -39,11 +39,12 @@ class Clients extends Admin
         }
 
         $search = null;
-        $clients = (new Client())->find();
+        $sellerId = user()->seller_id;
+        $clients = user()->level >= 5 ? (new Client())->find() : (new Client())->find('seller_id = :seller_id', "seller_id={$sellerId}");
 
         if (!empty($data["search"]) && str_search($data["search"]) != "all") {
             $search = str_search($data["search"]);
-            $clients = (new Client())->find("name LIKE CONCAT('%', :s, '%') OR phone LIKE CONCAT('%', :s, '%') OR phone_int LIKE CONCAT('%', :s, '%')", "s={$search}");
+            $clients = user()->level >= 5 ? (new Client())->find("name LIKE CONCAT('%', :s, '%') OR phone LIKE CONCAT('%', :s, '%') OR phone_int LIKE CONCAT('%', :s, '%')", "s={$search}") : (new Client())->find("seller_id = :seller_id AND (name LIKE CONCAT('%', :s, '%') OR phone LIKE CONCAT('%', :s, '%') OR phone_int LIKE CONCAT('%', :s, '%'))", "s={$search}&seller_id={$sellerId}");
             if (!$clients->count()) {
                 $this->message->info("Sua pesquisa não retornou resultados")->flash();
                 redirect("/admin/clients/home");
