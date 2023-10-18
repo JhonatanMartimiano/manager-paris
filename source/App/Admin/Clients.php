@@ -246,6 +246,36 @@ class Clients extends Admin
 
     public function delete(?array $data)
     {
+        $request = json_decode(file_get_contents("php://input"), true);
+        if ($request && $request["action"] == "delete") {
+            $request = filter_var_array($request, FILTER_SANITIZE_STRIPPED);
+            $client = (new Client())->findById($request["client_id"]);
+
+            if (!$client) {
+                $this->message->error("Você tentou deletar os dados de um cliente que não existe")->flash();
+                echo json_encode(["redirect" => url_back()]);
+                return;
+            }
+            if (!$client->deleteAllNegotiations()) {
+                $this->message->error("Não foi possível deletar")->flash();
+                echo json_encode(["redirect" => url_back()]);
+                return;
+            }
+
+            $client->funnel_id = null;
+            $client->status = 'Concluído';
+            $client->reason_loss = '';
+            if (!$client->save()) {
+                $this->message->error("Erro ao atualizar cliente")->flash();
+                echo json_encode(["redirect" => url_back()]);
+                return;
+            }
+
+            $this->message->success("A negociaçãp referente esse cliente foi excluída com sucesso...")->flash();
+            echo json_encode(["redirect" => url_back()]);
+            return;
+        }
+
         if ($data && $data["action"] == "delete") {
             $data = filter_var_array($data, FILTER_SANITIZE_STRIPPED);
             $client = (new Client())->findById($data["client_id"]);
@@ -262,7 +292,7 @@ class Clients extends Admin
             }
 
             $client->funnel_id = null;
-            $client->status = 'Negociação';
+            $client->status = 'Concluído';
             $client->reason_loss = '';
             if (!$client->save()) {
                 $json["message"] = $client->message()->render();
